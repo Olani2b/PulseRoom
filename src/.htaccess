@@ -1,0 +1,36 @@
+LimitRequestBody 10485760
+
+# Impedisce l'accesso diretto ai file .php
+<FilesMatch "\.php$">
+    Require all denied
+</FilesMatch>
+
+# Consenti l'accesso solo ai file specificati (ad esempio index.php)
+<Files "index.php">
+    Require all granted
+</Files>
+
+RewriteEngine On
+RewriteBase /
+
+# Forza HTTPS (opzionale)
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Non riscrivere richieste per risorse statiche
+RewriteCond %{REQUEST_URI} !\.(css|js|png|jpg|jpeg|gif|ico)$ [NC]
+
+# Non riscrivere richieste di file o directory esistenti
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# Riscrivi tutto verso index.php
+RewriteRule ^(.+)$ index.php [QSA,L]
+
+# Protezione del file .env
+<Files .env>
+    Require all denied
+</Files>
+
+# Disabilita l'indice di directory
+Options -Indexes

@@ -1,0 +1,6 @@
+vendor
+composer*
+.env
+Config-File
+dump
+logs

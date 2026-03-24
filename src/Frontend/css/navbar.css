@@ -1,0 +1,35 @@
+/* Stile per l'icona nel link Home */
+#HomeLink img {
+    width: 25px;
+    height: 25px;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+#mySidebar .w3-bar-item.w3-large.w3-padding-16 {
+    display:none;
+}
+
+/* Stile per i ruoli nel dashboard */
+#role span {
+    color: black; /* Default color for unknown role */
+}
+
+#role span.free {
+    color: lightgreen;
+}
+
+#role span.pro {
+    color: yellow;
+}
+
+#role span.admin {
+    color: red;
+}
+.hidden {
+    display: none;
+}
+
+.visible {
+    display: block;
+}

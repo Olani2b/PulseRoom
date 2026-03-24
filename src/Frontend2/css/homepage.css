@@ -1,0 +1,130 @@
+.bgimg-1 {
+    background-image: url('../imgs/bg.jpg');
+}
+.bgimg-2 {
+    background-image: url('../imgs/pricing.jpg');
+    color: white;
+}
+.bgimg-3 {       
+    background-image: url('../imgs/team.jpg');
+}  
+#home .scroll-arrows .fa {
+    color: white;
+}
+@media (max-width: 768px) {
+    .scroll-arrows {
+        display: none;
+    }
+}
+
+.w3-card img {
+    width: 60%;
+}
+.w3-section img {
+    width:100px; height:100px; vertical-align:middle; margin-right:5px;
+}
+.padding48 {
+    padding:48px;
+}
+
+#pricing{
+    padding:128px 16px;
+    position: relative;
+}
+
+.margin-top-46 {
+    margin-top:46px;
+}
+.margin-top-64 {
+    margin-top:46px;
+}
+#team {
+    padding:128px 16px;
+    position: relative;
+}
+
+#home .w3-display-left {
+    max-width: 700px;
+}
+
+#home .w3-xlarge,
+#home .w3-large {
+    color: rgba(255, 246, 239, 0.92);
+}
+
+#pricing h3,
+#pricing p,
+#team h3,
+#team p {
+    position: relative;
+    z-index: 1;
+}
+
+#pricing .w3-row-padding,
+#team .w3-row-padding {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#pricing .w3-ul {
+    border-radius: 28px;
+    overflow: hidden;
+    background: rgba(255, 250, 246, 0.80) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 24px 46px rgba(26, 18, 14, 0.16);
+}
+
+#pricing .w3-ul li {
+    color: #3d3029;
+    background: transparent;
+    border-bottom-color: rgba(124, 96, 79, 0.12);
+}
+
+#pricing .w3-ul li:first-child {
+    color: #fffaf6;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+#pricing .w3-ul .w3-khaki {
+    background: linear-gradient(135deg, rgba(171, 150, 113, 0.96), rgba(140, 119, 85, 0.94)) !important;
+}
+
+#pricing .w3-ul .w3-teal {
+    background: linear-gradient(135deg, rgba(122, 154, 144, 0.96), rgba(85, 116, 107, 0.94)) !important;
+}
+
+#pricing .w3-opacity {
+    color: #725f54;
+    opacity: 1;
+}
+
+#team .w3-card {
+    padding: 26px 20px 18px;
+    text-align: center;
+    background: rgba(255, 249, 244, 0.80);
+}
+
+#team .w3-card img {
+    width: 145px;
+    height: 145px;
+    object-fit: cover;
+    margin: 10px auto 18px;
+    border-radius: 50%;
+    border: 6px solid rgba(255, 255, 255, 0.72);
+    box-shadow: 0 14px 32px rgba(66, 40, 24, 0.15);
+}
+
+#team .w3-opacity {
+    color: #7a6558;
+    opacity: 1;
+}
+
+#footer img {
+    width: 90px;
+    height: auto;
+    opacity: 0.92;
+}
