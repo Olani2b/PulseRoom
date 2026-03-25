@@ -1,8 +1,8 @@
 
-# Novel Archive
+# Pulse Room
 ## Overview
 
-Novel Archive is the project for the "System and network Hacking"'s course of University of Pisa. The scope is to create a web platform that is secure in respect to the actual standards. The platform address amateur writers, providing them with a space to upload and read novels. So users can upload their works as short stories or full-length novels (in PDF format), with the option to mark them as "premium". Premium readers have exclusive access to novels marked as such.
+Pulse Room is the project for the "System and network Hacking"'s course of University of Pisa. The scope is to create a web platform that is secure in respect to the actual standards. The platform address amateur writers, providing them with a space to upload and read novels. So users can upload their works as short stories or full-length novels (in PDF format), with the option to mark them as "premium". Premium readers have exclusive access to novels marked as such.
 
 ## Features
 
@@ -32,8 +32,8 @@ Here are the installation steps:
 
 1. Clone the repository:
     ```
-    git clone https://github.com/Dimerin/Novel-Archive
-    cd Novel-Archive
+    git clone https://github.com/Dimerin/PulseRoom
+    cd PulseRoom
     ```
 2. Create or prepare a valid email for the application use.
 3. Create `.env` file with the following structure:
@@ -45,7 +45,7 @@ Here are the installation steps:
 
     MAIL_USER=my_email@my_domain.com
     MAIL_PASSWORD=my_mail_password
-    LOG_PATH=/var/www/logs/novel_archive
+    LOG_PATH=/var/www/logs/pulseroom
     ```
     Insert in the corrisponding fields the database and mail credentials.
 4. Download and install [composer](https://getcomposer.org/).

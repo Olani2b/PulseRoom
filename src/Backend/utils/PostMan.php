@@ -29,7 +29,7 @@ class PostMan {
         $this->postman->Port       = 587;                                   //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
 
         //Recipients
-        $this->postman->setFrom(getenv('MAIL_USER'), 'NovelArchive');   
+        $this->postman->setFrom(getenv('MAIL_USER'), 'PulseRoom');   
         //Content
         $this->postman->isHTML(true);                                  //Set email format to HTML
 

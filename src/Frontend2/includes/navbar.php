@@ -11,7 +11,7 @@
     <div class="w3-bar w3-black w3-card w3-animate-bottom" id="myNavbar">
         <a href="/" class="w3-bar-item w3-button w3-wide" id="HomeLink">
             <img src="./Frontend/imgs/icon.png" alt="Icon">
-            Novel Archive
+            Pulse Room
         </a>
         <div class="w3-right w3-hide-medium w3-hide-small">
             <?php

@@ -1,10 +1,10 @@
-# Novel Archive — Website Functionalities (Non‑Technical)
+# Pulse Room — Website Functionalities (Non‑Technical)
 
-This document describes what a normal user can do on the Novel Archive website.
+This document describes what a normal user can do on the Pulse Room website.
 
-## What Novel Archive is
+## What Pulse Room is
 
-Novel Archive is a web platform for amateur writers and readers:
+Pulse Room is a web platform for amateur writers and readers:
 
 - **Writers** can upload stories/novels.
 - **Readers** can browse the catalogue and read/download novels (depending on their plan).
@@ -111,4 +111,3 @@ If you are logged in as **Admin**, the Dashboard includes a **Manage Users** sec
   - Registration and password reset expect the platform to send emails.
 - **Strong passwords are required**
   - The server can reject passwords even if they “look strong” in a typical meter, especially if they include your name/email or common patterns.
-

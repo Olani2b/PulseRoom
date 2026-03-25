@@ -15,8 +15,8 @@
     <?php require __DIR__ . '/../includes/navbar.php'; ?>
     <header class="bgimg-1 w3-display-container w3-grayscale-min" id="home">
     <div class="w3-display-left w3-text-white padding48">
-        <span class="w3-jumbo w3-hide-small w3-animate-bottom w3-animate-delay-1">Novel Archive</span><br>
-        <span class="w3-xxlarge w3-hide-large w3-hide-medium w3-animate-bottom w3-animate-delay-1">Novel Archive</span><br>
+        <span class="w3-jumbo w3-hide-small w3-animate-bottom w3-animate-delay-1">Pulse Room</span><br>
+        <span class="w3-xxlarge w3-hide-large w3-hide-medium w3-animate-bottom w3-animate-delay-1">Pulse Room</span><br>
         <span class="w3-xlarge w3-animate-bottom w3-animate-delay-2">A place to inspire and be inspired</span>
         <p class="w3-animate-bottom w3-animate-delay-3">
             <a href="/login" class="w3-button w3-white w3-padding-large w3-large w3-margin-top w3-hover-opacity-on inline-link">LOGIN</a>

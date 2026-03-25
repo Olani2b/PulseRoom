@@ -1,4 +1,4 @@
-# Novel Archive - Comprehensive Security Audit Report
+# Pulse Room - Comprehensive Security Audit Report
 
 **Date of Audit:** March 2, 2026  
 **Project Type:** PHP/MySQL Web Application with Docker Deployment  
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Novel Archive implements a **multi-layered security architecture** with significant protections against common web vulnerabilities. The application demonstrates mature security practices including:
+Pulse Room implements a **multi-layered security architecture** with significant protections against common web vulnerabilities. The application demonstrates mature security practices including:
 
 - **CSRF Token Protection** on all state-changing operations
 - **Secure Password Hashing** using PHP's password_hash (PASSWORD_DEFAULT = bcrypt)
@@ -550,7 +550,7 @@ RUN a2enmod ssl
 RUN a2enmod socache_shmcb
 COPY Config-File/localhost+1.pem /etc/ssl/certs/certificate.crt
 COPY Config-File/localhost+1-key.pem /etc/ssl/private/server.key
-RUN a2ensite novelarchive-ssl.conf
+RUN a2ensite pulseroom-ssl.conf
 ```
 
 **Implementation (ssl-params.conf):**
@@ -967,13 +967,13 @@ private function getClientIp() {
 **Implementation:**
 ```yaml
 volumes:
-  - "./logs:/var/www/logs/novel_archive"
+  - "./logs:/var/www/logs/pulseroom"
 
 environment:
-  LOG_PATH: /var/www/logs/novel_archive
+  LOG_PATH: /var/www/logs/pulseroom
 ```
 
-**Log File:** `/var/www/logs/novel_archive/app_log.txt` (JSON format, one per line)  
+**Log File:** `/var/www/logs/pulseroom/app_log.txt` (JSON format, one per line)  
 **Status:** ✅ IMPLEMENTED
 
 ---
@@ -1185,7 +1185,7 @@ RewriteRule ^(.+)$ index.php [QSA,L]
 if($this->user_service->checkUserExistence($email)) {
     // User already registered with this email
     $message = file_get_contents(__DIR__ . '/../template/alertEmail.html');
-    $subject = 'Novel Archive email reuse';
+    $subject = 'Pulse Room email reuse';
     
     try {
         $this->postman->send($email, $subject, $message);
@@ -1617,7 +1617,7 @@ DB_PASSWORD=your_password_here
 DB_NAME=pulseroom
 MAIL_USER=your_email@gmail.com
 MAIL_PASSWORD=your_app_password
-LOG_PATH=/var/www/logs/novel_archive
+LOG_PATH=/var/www/logs/pulseroom
 EOF
 
 # 4. Create actual .env from template
@@ -2014,7 +2014,7 @@ $reset_url = getenv('APP_URL') . '/reset_password';
 $register_url = getenv('APP_URL') . '/verify_user';
 
 // .env file
-APP_URL=https://novelarchive.example.com
+APP_URL=https://pulseroom.example.com
 ```
 
 ---
@@ -2153,7 +2153,7 @@ $_SESSION['last_activity'] = time();
 **Recommendation:**
 ```txt
 # .well-known/security.txt
-Contact: security@novelarchive.example.com
+Contact: security@pulseroom.example.com
 Expires: 2026-03-02T12:00:00.000Z
 Preferred-Languages: en
 ```
@@ -2353,7 +2353,7 @@ private function checkRateLimit($endpoint) {
 
 ## Conclusion
 
-**Novel Archive demonstrates a strong security foundation** with well-implemented authentication, authorization, and CSRF protections. The application correctly uses prepared statements, secure password hashing, and proper session management.
+**Pulse Room demonstrates a strong security foundation** with well-implemented authentication, authorization, and CSRF protections. The application correctly uses prepared statements, secure password hashing, and proper session management.
 
 However, **critical infrastructure issues** (exposed database, PHPMyAdmin) and **missing best practices** (rate limiting, 2FA, GDPR support) require attention before production deployment.
 

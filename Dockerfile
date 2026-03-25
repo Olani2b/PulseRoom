@@ -7,11 +7,11 @@ RUN a2enmod headers
 COPY Config-File/localhost+1.pem /etc/ssl/certs/certificate.crt
 COPY Config-File/localhost+1-key.pem /etc/ssl/private/server.key
 COPY Config-File/ssl-params.conf /etc/apache2/conf-available/ssl-params.conf
-COPY Config-File/novelarchive-ssl.conf /etc/apache2/sites-available/novelarchive-ssl.conf
+COPY Config-File/pulseroom-ssl.conf /etc/apache2/sites-available/pulseroom-ssl.conf
 COPY Config-File/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
 
 RUN a2enconf ssl-params.conf
-RUN a2ensite novelarchive-ssl.conf
+RUN a2ensite pulseroom-ssl.conf
 RUN service apache2 restart
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y curl git

@@ -243,7 +243,7 @@ class UserController
         $actionLink = URL_PSW_RST_PAGE."?email=".$email."&token=".$token;
         $message = str_replace('{{ACTION_LINK}}', $actionLink, $htmlTemplate);
         // Send an email with the OTP
-        $subject = 'Reset your password account for Novel Archive';
+        $subject = 'Reset your password account for Pulse Room';
         
         try {
             $this->postman->send($email, $subject, $message);

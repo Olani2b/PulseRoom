@@ -1,4 +1,4 @@
-# SECURITY AUDIT SUMMARY - Novel Archive
+# SECURITY AUDIT SUMMARY - Pulse Room
 
 ## Quick Reference Guide
 
