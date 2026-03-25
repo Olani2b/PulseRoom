@@ -1,10 +1,57 @@
-[x] SQL injection defense: prepared statements are used throughout auth, token, user, and file queries in UserController.php (line 125), UserController.php (line 381), FileController.php (line 109), UserService.php (line 17), TokenService.php (line 19).
-[x] CSRF defense: session CSRF token is generated in router.php (line 199), validated on register/login/logout/reset/upload/delete in UserController.php (line 61), UserController.php (line 201), UserController.php (line 264), FileController.php (line 18), FileController.php (line 301), and inserted into forms in login.php (line 28) and register.php (line 29).
-[x] XSS defense: output encoding with htmlspecialchars() appears in FileController.php (line 73), FileController.php (line 98), navbar.php (line 28), plus CSP and X-XSS-Protection headers in router.php (line 205).
-[x] Session hijacking mitigation: HttpOnly, Secure, SameSite=Lax cookies in router.php (line 190), session ID regeneration after login in UserController.php (line 461), and session destruction on logout in UserController.php (line 490).
-[x] Weak-auth / brute-force defense: password policy + zxcvbn strength check in UserController.php (line 32), bcrypt hashing in UserController.php (line 125), login throttling in UserService.php (line 7) and UserService.php (line 90).
-[x] Email verification / reset-token security: cryptographically secure tokens with random_bytes() and 1-hour TTL in TokenService.php (line 12).
-[x] Access control / hidden content protection: route auth checks in router.php (line 93), admin-only endpoints in router.php (line 74), premium-content visibility checks in FileController.php (line 183), and owner-only delete enforcement in FileController.php (line 345).
-[x] Hidden content / direct access hardening: direct PHP access blocked, .env blocked, directory listing disabled, and HTTPS redirect in src/.htaccess (line 3).
-[x] MITM-related transport defense: HTTPS redirect in src/.htaccess (line 16), TLS 1.2+ only in ssl-params.conf (line 1).
-[x] File upload validation: size/type/name checks in FileController.php (line 47).
+## Security Measures Checklist
+
+- [x] **SQL Injection Defense**  
+  Prepared statements are used throughout:
+  - `UserController.php` (line 125, 381)
+  - `FileController.php` (line 109)
+  - `UserService.php` (line 17)
+  - `TokenService.php` (line 19)
+
+- [x] **CSRF Defense**  
+  - Session CSRF token generated in `router.php` (line 199)  
+  - Validated on:
+    - register/login/logout/reset → `UserController.php` (line 61, 201, 264)
+    - upload/delete → `FileController.php` (line 18, 301)  
+  - Inserted into forms:
+    - `login.php` (line 28)
+    - `register.php` (line 29)
+
+- [x] **XSS Defense**  
+  - Output encoding with `htmlspecialchars()`:
+    - `FileController.php` (line 73, 98)
+    - `navbar.php` (line 28)  
+  - Security headers:
+    - CSP + X-XSS-Protection → `router.php` (line 205)
+
+- [x] **Session Hijacking Mitigation**  
+  - Cookies: `HttpOnly`, `Secure`, `SameSite=Lax` → `router.php` (line 190)  
+  - Session ID regeneration after login → `UserController.php` (line 461)  
+  - Session destruction on logout → `UserController.php` (line 490)
+
+- [x] **Weak Auth / Brute-Force Defense**  
+  - Password policy + `zxcvbn` strength check → `UserController.php` (line 32)  
+  - Password hashing (`bcrypt`) → `UserController.php` (line 125)  
+  - Login throttling → `UserService.php` (line 7, 90)
+
+- [x] **Email Verification / Reset Token Security**  
+  - Secure tokens via `random_bytes()`  
+  - 1-hour TTL → `TokenService.php` (line 12)
+
+- [x] **Access Control / Hidden Content Protection**  
+  - Route auth checks → `router.php` (line 93)  
+  - Admin-only endpoints → `router.php` (line 74)  
+  - Premium content visibility → `FileController.php` (line 183)  
+  - Owner-only delete enforcement → `FileController.php` (line 345)
+
+- [x] **Hidden Content / Direct Access Hardening**  
+  - Direct PHP access blocked  
+  - `.env` blocked  
+  - Directory listing disabled  
+  - HTTPS redirect → `src/.htaccess` (line 3)
+
+- [x] **MITM Transport Defense**  
+  - HTTPS redirect → `src/.htaccess` (line 16)  
+  - TLS 1.2+ enforced → `ssl-params.conf` (line 1)
+
+- [x] **File Upload Validation**  
+  - Size/type/name checks → `FileController.php` (line 47)
