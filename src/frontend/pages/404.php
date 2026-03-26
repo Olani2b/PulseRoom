@@ -1,4 +1,8 @@
-<?php $currentUserRole = 'guest'; ?>
+<?php
+$assetBase = '/frontend';
+$currentUserRole = $_SESSION['role'] ?? 'guest';
+$currentPage = '';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,10 +10,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Page Not Found | PulseRoom</title>
 
-  <link rel="stylesheet" href="../css/main.css">
-  <link rel="stylesheet" href="../css/navbar.css">
-  <link rel="stylesheet" href="../css/footer.css">
-  <link rel="stylesheet" href="../css/404.css">
+  <link rel="stylesheet" href="<?= $assetBase; ?>/css/main.css">
+  <link rel="stylesheet" href="<?= $assetBase; ?>/css/navbar.css">
+  <link rel="stylesheet" href="<?= $assetBase; ?>/css/footer.css">
+  <link rel="stylesheet" href="<?= $assetBase; ?>/css/404.css">
 </head>
 <body>
 
@@ -17,20 +21,16 @@
 
   <main class="error-page">
     <div class="error-container">
-
       <h1 class="error-code">404</h1>
-
       <h2 class="error-title">Page Not Found</h2>
-
       <p class="error-message">
         The page you are looking for does not exist or has been moved.
       </p>
 
       <div class="error-actions">
-        <a href="index.php" class="btn btn-primary">Go Home</a>
-        <a href="dashboard.php" class="btn btn-secondary">Dashboard</a>
+        <a href="/" class="btn btn-primary">Go Home</a>
+        <a href="/dashboard" class="btn btn-secondary">Dashboard</a>
       </div>
-
     </div>
   </main>
 
