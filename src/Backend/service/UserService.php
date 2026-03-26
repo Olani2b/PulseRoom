@@ -37,18 +37,28 @@ class UserService
         return $rows_check;
     }
 
+    public function checkUsernameExistence($username)
+    {
+        $stmt = $this->conn->prepare("SELECT 1 FROM users WHERE username = ?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $stmt->store_result();
+        $rows_check = $stmt->num_rows > 0;
+        $stmt->close();
+
+        return $rows_check;
+    }
+
     public function setUserStatus($email, $status)
     {
-        // Aggiorna lo stato dell'utente
+        // Treat "already in this state" as success too. A repeated password-reset
+        // request should not fail just because the account is already inactive.
         $stmt = $this->conn->prepare("UPDATE users SET active = ? WHERE email = ?");
         $stmt->bind_param("is", $status, $email);
         $executed = $stmt->execute();
-        $stmt->store_result();
-        
-        $rows_check = $stmt->affected_rows === 1;   
         $stmt->close();
 
-        return $rows_check && $executed;
+        return $executed;
     }
 
     public function updateUserRole($id, $newRole)

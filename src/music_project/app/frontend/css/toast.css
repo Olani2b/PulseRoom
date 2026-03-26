@@ -1,0 +1,36 @@
+.toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    min-width: 220px;
+    max-width: 360px;
+    background: #13243b;
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    padding: 14px 18px;
+    border-radius: 14px;
+    font-size: 14px;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .toast.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .toast-success {
+    border-color: rgba(109, 169, 139, 0.45);
+  }
+
+  .toast-error {
+    border-color: rgba(156, 74, 82, 0.45);
+  }
+
+  .toast-warning {
+    border-color: rgba(186, 154, 99, 0.45);
+  }

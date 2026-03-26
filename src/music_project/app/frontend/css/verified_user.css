@@ -1,0 +1,83 @@
+.verified-page {
+    min-height: calc(100vh - 160px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 70px 20px;
+  }
+  
+  .verified-card {
+    width: 100%;
+    max-width: 560px;
+    background: #111827;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 42px 32px;
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.30);
+  }
+  
+  .verified-icon-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+  
+  .verified-icon {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #20d4ff, #6d6df6);
+    color: white;
+    font-size: 40px;
+    font-weight: 700;
+  }
+  
+  .verified-tag {
+    display: inline-block;
+    margin-bottom: 12px;
+    color: var(--accent-2);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  
+  .verified-title {
+    margin: 0 0 14px;
+    font-size: 38px;
+    color: white;
+  }
+  
+  .verified-text {
+    margin: 0 auto;
+    max-width: 430px;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text-soft);
+  }
+  
+  .verified-actions {
+    margin-top: 28px;
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  
+  @media (max-width: 768px) {
+    .verified-card {
+      padding: 28px 20px;
+    }
+  
+    .verified-title {
+      font-size: 30px;
+    }
+  
+    .verified-text {
+      font-size: 15px;
+    }
+  }

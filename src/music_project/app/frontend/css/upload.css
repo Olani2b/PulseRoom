@@ -1,0 +1,148 @@
+.upload-page {
+    padding: 50px 60px 70px;
+  }
+  
+  .upload-header {
+    max-width: 760px;
+    margin-bottom: 30px;
+  }
+  
+  .upload-tag {
+    display: inline-block;
+    color: var(--accent-2);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .upload-header h1 {
+    margin: 0 0 10px;
+    font-size: 42px;
+  }
+  
+  .upload-header p {
+    margin: 0;
+    color: var(--text-soft);
+    line-height: 1.7;
+  }
+  
+  .upload-mode-switch {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  
+  .tab-btn {
+    background: #111827;
+    border: 1px solid var(--border);
+    color: white;
+    padding: 12px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  
+  .tab-btn.active-tab {
+    border-color: var(--accent);
+    background: rgba(124, 92, 255, 0.12);
+  }
+  
+  .upload-panel {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+  
+  .upload-form {
+    background: #13243b;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px;
+  }
+  
+  .upload-form h2 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-size: 28px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    font-weight: 600;
+    font-size: 15px;
+  }
+  
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: #0e1a2c;
+    color: white;
+    font-size: 16px;
+    outline: none;
+  }
+  
+  .form-group textarea {
+    resize: vertical;
+  }
+  
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    border-color: var(--accent);
+  }
+  
+  .field-hint {
+    color: var(--text-soft);
+    font-size: 13px;
+  }
+
+  .radio-label {
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .radio-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .radio-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .radio-option input {
+    width: auto;
+  }
+  
+  @media (max-width: 768px) {
+    .upload-page {
+      padding: 40px 20px 60px;
+    }
+  
+    .upload-header h1 {
+      font-size: 34px;
+    }
+  
+    .upload-form {
+      padding: 22px;
+    }
+  }

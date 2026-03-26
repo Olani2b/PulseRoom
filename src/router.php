@@ -28,7 +28,7 @@ class Router
         // Define the paths
         $this->base_path = __DIR__;
         $this->api_path = "{$this->base_path}/Backend/api";
-        $this->pages_path = "{$this->base_path}/Frontend/pages";
+        $this->pages_path = "{$this->base_path}/music_project/app/frontend/pages";
 
         $this->fc = new FileController();
         $this->uc = new UserController();
@@ -131,13 +131,15 @@ class Router
     {   
         // Mappatura dei percorsi alle pagine e requisiti di autenticazione
         $pages = [
-            '' => ['page' => 'homepage', 'auth' => 'unauthenticated'],
-            '/' => ['page' => 'homepage', 'auth' => 'unauthenticated'],
+            '' => ['page' => 'index', 'auth' => 'unauthenticated'],
+            '/' => ['page' => 'index', 'auth' => 'unauthenticated'],
             '/login' => ['page' => 'login', 'auth' => 'unauthenticated'],
             '/register' => ['page' => 'register', 'auth' => 'unauthenticated'],
             '/dashboard' => ['page' => 'dashboard', 'auth' => 'authenticated'],
-            '/logout' => ['page' => 'logout', 'auth' => 'unauthenticated'], // chi ci puo accedere alla pagina?
-            '/verify_user' => ['page' => 'verify_user', 'auth' => 'unauthenticated'],
+            '/upload' => ['page' => 'upload', 'auth' => 'authenticated'],
+            '/admin' => ['page' => 'admin', 'auth' => 'admin'],
+            '/logout' => ['page' => 'logout', 'auth' => 'authenticated'],
+            '/verify_user' => ['page' => 'verified_user', 'auth' => 'unauthenticated'],
             '/forgot_password' => ['page' => 'forgot_password', 'auth' => 'unauthenticated'],
             '/reset_password' => ['page' => 'reset_password', 'auth' => 'unauthenticated'],
         ];
@@ -156,6 +158,12 @@ class Router
         if ($pageInfo['auth'] === 'authenticated' && !$this->isAuthenticated()) {
             $this->logger->error('handleRequest', 'Unauthorized.', 401);
             header("Location: /login");
+            exit();
+        }
+
+        if ($pageInfo['auth'] === 'admin' && !$this->isAdmin()) {
+            $this->logger->error('handleRequest', 'Unauthorized.', 401);
+            header("Location: /dashboard");
             exit();
         }
 

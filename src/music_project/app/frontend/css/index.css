@@ -1,0 +1,179 @@
+.hero {
+    position: relative;
+    min-height: 78vh;
+    display: flex;
+    align-items: center;
+    padding: 80px 60px;
+    background:
+      linear-gradient(rgba(2, 6, 23, 0.68), rgba(2, 6, 23, 0.9)),
+      url("/music_project/app/frontend/images/bg.jpg") center/cover no-repeat;
+  }
+  
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+  }
+  
+  .hero-content {
+    position: relative;
+    max-width: 760px;
+  }
+  
+  .hero-tag {
+    display: inline-block;
+    color: var(--accent-2);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+  
+  .hero h1 {
+    margin: 0 0 18px;
+    font-size: 64px;
+    line-height: 1.05;
+  }
+  
+  .hero p {
+    margin: 0;
+    color: var(--text-soft);
+    line-height: 1.8;
+    font-size: 18px;
+    max-width: 650px;
+  }
+  
+  .hero-buttons {
+    margin-top: 28px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  
+  .plans-section,
+  .team-section {
+    padding: 70px 60px;
+  }
+  
+  .section-heading.center {
+    text-align: center;
+    max-width: 780px;
+    margin: 0 auto 40px;
+  }
+  
+  .section-tag {
+    display: inline-block;
+    color: var(--accent-2);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .section-heading h2 {
+    margin: 0 0 14px;
+    font-size: 38px;
+  }
+  
+  .section-heading p {
+    margin: 0;
+    color: var(--text-soft);
+    line-height: 1.8;
+  }
+  
+  .plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 28px;
+  }
+  
+  .plan-card {
+    background: #111827;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+  }
+  
+  .plan-header {
+    padding: 24px;
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+  }
+  
+  .free-header {
+    background: #d6c66f;
+    color: #111827;
+  }
+  
+  .premium-header {
+    background: #0f766e;
+    color: white;
+  }
+  
+  .plan-body {
+    padding: 28px;
+  }
+  
+  .plan-body ul {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--text-soft);
+    line-height: 1.9;
+  }
+  
+  .premium-card {
+    border-color: rgba(15, 118, 110, 0.5);
+  }
+  
+  .team-grid {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+  
+  .team-card {
+    background: #111827;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 30px;
+    width: 240px;
+    text-align: center;
+  }
+  
+  .team-avatar {
+    width: 78px;
+    height: 78px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #3b82f6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: 700;
+    margin: 0 auto 18px;
+  }
+  
+  .team-card h3 {
+    margin: 0;
+  }
+  
+  @media (max-width: 768px) {
+    .hero {
+      padding: 60px 20px;
+      min-height: 68vh;
+    }
+  
+    .hero h1 {
+      font-size: 42px;
+    }
+  
+    .plans-section,
+    .team-section {
+      padding: 50px 20px;
+    }
+  
+    .section-heading h2 {
+      font-size: 30px;
+    }
+  }

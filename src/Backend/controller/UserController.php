@@ -58,7 +58,7 @@ class UserController
 
     public function register()
     {
-        if(!isset($_POST['csrf_token']) || !is_string($_POST['csrf_token']) 
+        if(!isset($_SESSION['csrf_token'], $_POST['csrf_token']) || !is_string($_POST['csrf_token']) 
             || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
             $this->logger->error('register', 'Invalid request.', 401);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid request.'], 401);
@@ -76,7 +76,7 @@ class UserController
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid request.'], 400);
         }
         
-        $username = $_POST['username'];
+        $username = trim($_POST['username']);
         $email = $_POST['email'];
         $password = $_POST['password'];
         $conf_password = $_POST['conf_password'];
@@ -102,20 +102,19 @@ class UserController
         
         // Check if the user already exists
         if($this->user_service->checkUserExistence($email)) {
-            // Send alert email
-            $message = file_get_contents(__DIR__ . '/../template/alertEmail.html');
-            // Send an email with the OTP
-            $subject = 'Pulse Room email reuse';
-            try {
-                $this->postman->send($email, $subject, $message);
-            } catch (Exception $e) {
-                $this->logger->error('register', 'Failed to send alarm email.', 500);
-            }
             $this->logger->error('register', 'email re-use for registration.', 409);
             return $this->sendResponse([
-                'status' => 'success', 
-                'message' => 'A confirmation email has been sent to your account.'
-            ], 201);
+                'status' => 'error', 
+                'message' => 'Email already in use.'
+            ], 409);
+        }
+
+        if($this->user_service->checkUsernameExistence($username)) {
+            $this->logger->error('register', 'username re-use for registration.', 409);
+            return $this->sendResponse([
+                'status' => 'error',
+                'message' => 'Username is already in use. Please choose another one.'
+            ], 409);
         }
 
         // Generate token
@@ -229,11 +228,6 @@ class UserController
         // Store the token in the tokens table
         if ($this->token_service->storeToken($token, $email, 'reset') == false) {
             $this->logger->error('forgotPassword', 'Failed to initiate password reset.', 500);
-            return $this->sendResponse(['status' => 'error', 'message' => 'Failed to initiate password reset.'], 500);
-        }
-
-        if(!$this->user_service->setUserStatus($email, INACTIVE)){
-            $this->logger->error('forgotPassword', 'Failed to disable user.', 500);
             return $this->sendResponse(['status' => 'error', 'message' => 'Failed to initiate password reset.'], 500);
         }
         
@@ -356,8 +350,8 @@ class UserController
             ], 401);
         }
 
-        if (!isset($_POST['email']) || !isset($_POST['password']) 
-                || !is_string($_POST['email']) || !is_string($_POST['password'])) {
+        if (!isset($_POST['username']) || !isset($_POST['password']) 
+                || !is_string($_POST['username']) || !is_string($_POST['password'])) {
             $this->logger->error('login', 'Invalid request parameters.', 400);
             return $this->sendResponse([
                 'status' => 'error', 
@@ -365,25 +359,24 @@ class UserController
             ], 400);
         }
 
-        $email = $_POST['email'];
+        $username = trim($_POST['username']);
         $password = $_POST['password'];
 
-        // Check the email format
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->error('login', 'Invalid email format.', 400);
+        if ($username === '') {
+            $this->logger->error('login', 'Invalid username.', 400);
             return $this->sendResponse([
                 'status' => 'error', 
-                'message' => 'Invalid email format.'
+                'message' => 'Invalid username.'
             ], 400);
         }
 
         // Controlla se l'utente esiste
         $stmt = $this->conn->prepare( 
-            "SELECT id, username, password, role, active, first_attempt, last_attempt, timedout, attempts 
+            "SELECT id, username, email, password, role, active, first_attempt, last_attempt, timedout, attempts 
                     FROM users 
-                    WHERE email = ?"
+                    WHERE username = ?"
                 );
-        $stmt->bind_param("s", $email);
+        $stmt->bind_param("s", $username);
         $stmt->execute();
         $stmt->store_result();
 
@@ -391,7 +384,7 @@ class UserController
             $stmt->close();
             $this->logger->error(
                 'login', 
-                'Invalid email or password.', 
+                'Invalid username or password.', 
                 401
             );
             return $this->sendResponse([
@@ -400,7 +393,7 @@ class UserController
             ], 401);
         }
 
-        $stmt->bind_result($id, $username, $hashedPassword, $role, $status, 
+        $stmt->bind_result($id, $username, $email, $hashedPassword, $role, $status, 
                     $first_attempt, $last_attempt, $timedout, $attempts);
         $stmt->fetch();
         $stmt->close();
@@ -435,7 +428,7 @@ class UserController
             }
             $this->logger->error(
                 'login', 
-                'Invalid email or password.', 
+                'Invalid username or password.', 
                 401
             );
             return $this->sendResponse([

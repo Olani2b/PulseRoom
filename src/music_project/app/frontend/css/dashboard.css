@@ -1,0 +1,417 @@
+.dashboard-page {
+  padding: 44px 18px 84px;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.03), transparent 30%),
+    linear-gradient(180deg, #202733 0%, #151d2a 100%);
+  min-height: calc(100vh - 90px);
+}
+
+.catalogue-shell {
+  max-width: 1340px;
+  margin: 0 auto;
+  padding: 56px 44px 46px;
+  background: #1b2436;
+  border: 1px solid rgba(140, 164, 204, 0.1);
+  border-radius: 30px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.catalogue-head {
+  text-align: center;
+  margin-bottom: 44px;
+}
+
+.catalogue-head h1 {
+  margin: 0;
+  font-size: clamp(44px, 5vw, 58px);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+
+.dashboard-controls {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 38px;
+}
+
+.filter-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 12px;
+  background: #2a3141;
+  border-radius: 999px;
+}
+
+.filter-label {
+  color: #d5d8de;
+  font-size: 15px;
+  padding: 0 8px 0 6px;
+}
+
+.filter-btn {
+  background: #8e6f61;
+  border: 0;
+  color: #f4ede7;
+  min-width: 114px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.filter-btn.active {
+  background: #efe5df;
+  color: #574c48;
+}
+
+.filter-btn-icon::before {
+  display: inline-block;
+  margin-right: 8px;
+  opacity: 0.9;
+}
+
+.filter-btn[data-file-type="mp3"]::before {
+  content: "♫";
+}
+
+.filter-btn[data-file-type="txt"]::before {
+  content: "🗎";
+}
+
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.media-card {
+  min-height: 392px;
+  background: #1a2437;
+  border: 1px solid rgba(100, 130, 180, 0.14);
+  border-radius: 28px;
+  padding: 26px 20px 22px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.015);
+}
+
+.media-icon {
+  width: 82px;
+  height: 82px;
+  margin: 0 auto 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 54px;
+  line-height: 1;
+}
+
+.media-card h3 {
+  margin: 0 0 18px;
+  font-size: 19px;
+  font-weight: 400;
+  min-height: 48px;
+}
+
+.media-artist {
+  color: #d5d8df;
+  line-height: 1.7;
+  margin: 0 0 14px;
+  font-size: 18px;
+  font-style: italic;
+}
+
+.media-meta {
+  font-size: 14px;
+  color: #c9ced6;
+  margin-bottom: 16px;
+}
+
+.access-badge {
+  margin: 0 auto;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.access-free {
+  color: #65e34a;
+}
+
+.access-pro {
+  color: #ebc94e;
+}
+
+.media-actions {
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding-top: 26px;
+}
+
+.media-actions.has-two-actions .btn-small {
+  width: 100%;
+}
+
+.btn-small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  min-width: 172px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 400;
+  cursor: pointer;
+  border: 1px solid rgba(136, 166, 203, 0.18);
+  width: 100%;
+}
+
+.media-actions .btn-small:only-child {
+  grid-column: 1 / -1;
+}
+
+.read-btn {
+  background: #2b3a4e;
+  color: #dce5ef;
+}
+
+.download-btn {
+  background: #7c7fd7;
+  color: #2f2f44;
+  border-color: rgba(124, 127, 215, 0.5);
+}
+
+.delete-btn {
+  background: rgba(124, 66, 74, 0.52);
+  color: #f2dce0;
+  border-color: rgba(178, 109, 120, 0.35);
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1200;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 980px;
+  background: transparent;
+  border: 0;
+  border-radius: 18px;
+  padding: 0;
+  position: relative;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+}
+
+.lyrics-book-modal {
+  overflow: visible;
+}
+
+.lyrics-book {
+  position: relative;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: stretch;
+  filter: drop-shadow(0 22px 44px rgba(0, 0, 0, 0.36));
+}
+
+.lyrics-book-spine {
+  border-radius: 22px 0 0 22px;
+  background:
+    linear-gradient(180deg, #6e5649 0%, #4f392f 45%, #3d2c24 100%);
+  box-shadow:
+    inset -6px 0 10px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.lyrics-book-page {
+  min-height: 72vh;
+  max-height: 72vh;
+  overflow: auto;
+  padding: 48px 54px 52px;
+  border-radius: 0 22px 22px 0;
+  background:
+    linear-gradient(90deg, rgba(138, 112, 94, 0.13) 0, rgba(138, 112, 94, 0.08) 18px, transparent 36px),
+    linear-gradient(180deg, #f2e4cb 0%, #ead7b7 100%);
+  color: #4e4033;
+  box-shadow:
+    inset 0 0 0 1px rgba(90, 66, 48, 0.16),
+    inset 0 0 32px rgba(124, 97, 73, 0.08);
+}
+
+.lyrics-book-header {
+  text-align: center;
+  padding-bottom: 26px;
+  margin-bottom: 26px;
+  border-bottom: 1px solid rgba(88, 64, 48, 0.18);
+}
+
+.lyrics-book-tag {
+  display: inline-block;
+  margin-bottom: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: #8c6e58;
+}
+
+.lyrics-book-header h2 {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 500;
+  color: #4a3c30;
+}
+
+.modal-subtitle {
+  margin: 10px 0 0;
+  color: #7f6654;
+  font-size: 16px;
+  font-style: italic;
+}
+
+.modal-lyrics {
+  display: grid;
+  gap: 22px;
+  font-size: 18px;
+  line-height: 1.95;
+  color: #4f4236;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.lyrics-stanza {
+  display: grid;
+  gap: 6px;
+}
+
+.lyrics-line {
+  display: block;
+}
+
+.lyrics-empty {
+  margin: 0;
+  text-align: center;
+  color: #7f6654;
+  font-style: italic;
+}
+
+.close-modal {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(88, 64, 48, 0.18);
+  background: rgba(242, 228, 203, 0.92);
+  color: #584234;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.pager {
+  margin-top: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pager-label {
+  color: #d3d7de;
+  font-size: 26px;
+  line-height: 1;
+  padding: 0 10px;
+}
+
+.pager-btn {
+  min-width: 114px;
+  min-height: 44px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: #4a3d3a;
+  border: 0;
+  color: #cbc7c6;
+}
+
+.pager-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.empty-state {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+  color: var(--text-soft);
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  .media-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-page {
+    padding: 28px 12px 60px;
+  }
+
+  .catalogue-shell {
+    padding: 30px 18px 30px;
+    border-radius: 24px;
+  }
+
+  .media-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-group {
+    justify-content: center;
+    border-radius: 28px;
+  }
+
+  .filter-btn {
+    min-width: 100px;
+  }
+
+  .lyrics-book {
+    grid-template-columns: 18px minmax(0, 1fr);
+  }
+
+  .lyrics-book-page {
+    min-height: 76vh;
+    max-height: 76vh;
+    padding: 44px 22px 30px;
+  }
+
+  .modal-lyrics {
+    font-size: 16px;
+    line-height: 1.8;
+  }
+}
