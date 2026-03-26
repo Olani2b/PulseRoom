@@ -1,5 +1,5 @@
 <?php
-$assetBase = '/music_project/app/frontend';
+$assetBase = '/frontend';
 $currentUserRole = 'guest';
 $currentPage = 'login';
 $email = isset($_GET['email']) ? htmlspecialchars($_GET['email'], ENT_QUOTES, 'UTF-8') : '';

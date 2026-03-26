@@ -6,7 +6,7 @@
     padding: 80px 60px;
     background:
       linear-gradient(rgba(2, 6, 23, 0.68), rgba(2, 6, 23, 0.9)),
-      url("/music_project/app/frontend/images/bg.jpg") center/cover no-repeat;
+      url("/frontend/images/bg.jpg") center/cover no-repeat;
   }
   
   .hero-overlay {

@@ -28,7 +28,7 @@ class Router
         // Define the paths
         $this->base_path = __DIR__;
         $this->api_path = "{$this->base_path}/Backend/api";
-        $this->pages_path = "{$this->base_path}/music_project/app/frontend/pages";
+        $this->pages_path = "{$this->base_path}/frontend/pages";
 
         $this->fc = new FileController();
         $this->uc = new UserController();

@@ -1,5 +1,5 @@
 <?php
-$assetBase = '/music_project/app/frontend';
+$assetBase = '/frontend';
 $currentUserRole = 'guest';
 $currentPage = 'login';
 ?>

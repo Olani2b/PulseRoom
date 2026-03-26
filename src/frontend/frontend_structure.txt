@@ -1,0 +1,21 @@
+frontend/
+├── docker-compose.yml
+├── Dockerfile
+├── css/
+├── images/
+├── js/
+├── partials/
+│   ├── navbar.php
+│   └── footer.php
+└── pages/
+    ├── 404.php
+    ├── admin.php
+    ├── dashboard.php
+    ├── forgot_password.php
+    ├── index.php
+    ├── login.php
+    ├── logout.php
+    ├── register.php
+    ├── reset_password.php
+    ├── upload.php
+    └── verified_user.php
