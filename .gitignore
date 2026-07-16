@@ -1,5 +1,8 @@
 vendor
 composer*
+!composer.json
+!src/composer.json
+!src/composer.lock
 .env
 Config-File
 dump

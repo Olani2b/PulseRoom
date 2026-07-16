@@ -175,15 +175,14 @@ Endpoint per eseguire il reset della password. L'utente invia una richiesta POST
 ### Upload File/Text
 Endpoint per caricare contenuti, sia file che testo. Questo endpoint permette agli utenti di caricare file o testo, con un controllo sui permessi in base alla visibilità dell'utente e alla categoria del contenuto.
 
-- **URL:** `POST /api/upload`
+- **URL:** `POST /api/upload_file`
 - **Request Body:**
   ```json
   {
-    "upload_type": "file | text",
-    "file": "file_data (solo se upload_type è file)",
-    "text_content": "text_data (solo se upload_type è text)",
-    "title": "content_title (solo se upload_type è text)",
-    "novel_category": "free | pro" 
+    "file": "mp3_file",
+    "text_content": "lyrics_text",
+    "title": "track_title",
+    "track_visibility": "free | pro" 
   }
   ```
   **Response Body:**
@@ -245,5 +244,4 @@ Endpoint per visualizzare i file caricati dall'utente, con la possibilità di fi
     "last-page": "isLastPage"
   }
   ```
-
 

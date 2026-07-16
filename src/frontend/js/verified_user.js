@@ -10,8 +10,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
+  window.history.replaceState({}, document.title, '/verify_user');
+
   try {
-    const response = await fetch(`/api/verify_user?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`);
+    const response = await fetch('/api/verify_user', {
+      method: 'POST',
+      body: new URLSearchParams({ email, token })
+    });
     const result = await response.json();
 
     if (!response.ok || result.status !== 'success') {

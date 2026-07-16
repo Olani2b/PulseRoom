@@ -24,7 +24,7 @@ set_error_handler(function($severity, $message, $file, $line) {
     echo json_encode([
         'status' => 'error',
         'message' => 'Internal server error',
-        'debug' => error_get_last()
+        //'debug' => error_get_last()
     ]);
     exit();
 });
@@ -38,7 +38,7 @@ register_shutdown_function(function() {
         echo json_encode([
             'status' => 'error',
             'message' => 'Fatal error occurred',
-            'debug' => $error
+            //'debug' => $error
         ]);
         exit();
     }

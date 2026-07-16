@@ -50,8 +50,8 @@ $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 **Database:** `tokens` table with TTL enforcement  
 **Implementation:**
 1. User registers with email and password
-2. Token generated: `bin2hex(random_bytes(100))` = 200 hex characters
-3. Token stored in database with `created_at` timestamp
+2. Token generated: `bin2hex(random_bytes(32))` = 64 hex characters
+3. SHA-256 token hash stored in the database with a `created_at` timestamp
 4. Email sent with verification link: `https://localhost/verify_user?email=X&token=Y`
 5. User clicks link → token validated against database
 6. Token must be created within **1 hour** (checked in TokenService)
@@ -60,11 +60,11 @@ $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 **Code Evidence:**
 ```php
 // Token generation
-$token = $this->token_service->generateToken(100); // 100 bytes = 200 hex chars
+$token = $this->token_service->generateToken(32); // 32 bytes = 64 hex chars
 
 // Token validation - 1 hour expiration
-$true_created_at = date('Y-m-d H:i:s', strtotime('-1 hour'));
-$stmt->bind_param("ssss", $token, $email, $purpose, $true_created_at);
+$tokenHash = hash('sha256', $token);
+$stmt->bind_param("sss", $tokenHash, $email, $purpose);
 ```
 
 **Vulnerabilities Prevented:** Account Takeover (unverified email), Email Spoofing  
@@ -628,7 +628,7 @@ private $timeout_time = 1;     // Timeout window: 1 minute
 if(!password_verify($password, $hashedPassword)) {
     if($status === ACTIVE) {
         $this->user_service->updateLoginAttempts(
-            $email, $first_attempt, $timedout, $attempts
+            $email, $last_attempt, $timedout, $attempts
         );
     }
     return 'Invalid credentials or too many failed attempts.';
@@ -637,11 +637,11 @@ if(!password_verify($password, $hashedPassword)) {
 
 **Rate Limiting Logic (`UserService.php` lines 102-125):**
 ```php
-public function updateLoginAttempts($email, $first_attempt, $timedout, $attempts) {
+public function updateLoginAttempts($email, $last_attempt, $timedout, $attempts) {
     $now = new DateTime();
-    $minutes = $this->differenceInMinutes(new DateTime($first_attempt), $now);
+    $minutes = $this->differenceInMinutes(new DateTime($last_attempt), $now);
     
-    // If >1 minute passed since first attempt, reset counter
+    // If >1 minute passed since the last attempt, reset counter
     if($minutes > $this->timeout_time) {
         $this->resetAttempts($email);
         $attempts = 0;
@@ -676,7 +676,7 @@ if($timedout) {
 ```
 
 **Sequence:**
-1. First failed attempt: Set `first_attempt` timestamp, `attempts=1`
+1. First failed attempt: Set `last_attempt` timestamp, `attempts=1`
 2. Second failed attempt (within 1 min): `attempts=2`
 3. Third failed attempt (within 1 min): `attempts=3`, `timedout=1`, send alert email
 4. User locked out for 1 minute
@@ -867,23 +867,15 @@ private function sendResponse($data, $statusCode = 200) {
 ### 12. LOGGING & MONITORING
 
 #### 12.1 Comprehensive Request Logging
-**Location:** `src/Backend/utils/Logger.php`  
+**Location:** `src/Backend/utils/Logging.php`
 **Logged Information:**
 ```php
-$logEntry = [
-    'timestamp' => date('Y-m-d H:i:s'),
-    'log_level' => 'INFO' | 'ERROR' | 'WARNING' | 'DEBUG',
-    'client_ip' => $_SERVER['REMOTE_ADDR'] | $_SERVER['HTTP_X_FORWARDED_FOR'],
-    'action' => 'login' | 'register' | 'upload', etc.
-    'method' => $_SERVER['REQUEST_METHOD'],
-    'url' => $_SERVER['REQUEST_URI'],
-    'query_params' => [filtered],
-    'body_params' => [filtered],
-    'session_data' => [filtered],
-    'response_code' => 200 | 401 | 500, etc.
-    'message' => 'Login successful' | 'Invalid token', etc.
-    'user_agent' => $_SERVER['HTTP_USER_AGENT']
-];
+$handler = new StreamHandler($logFile, Level::Debug, true, 0660);
+$handler->setFormatter(new JsonFormatter(JsonFormatter::BATCH_MODE_JSON, true));
+
+$logger = new Logger('pulseroom');
+$logger->pushHandler($handler);
+$logger->pushProcessor('addRequestLogContext');
 ```
 
 **Log Levels:**
@@ -907,21 +899,11 @@ $logEntry = [
 ---
 
 #### 12.2 Sensitive Data Filtering in Logs
-**Location:** `src/Backend/utils/Logger.php` (lines 63-70)  
+**Location:** `src/Backend/utils/Logging.php`
 **Implementation:**
 ```php
-private $sensitiveFields = [
-    'password', 'new_password', 'conf_new_password',
-    'csrf_token', 'token', 'conf_password', 'PHPSESSID'
-];
-
-private function filterSensitiveData($requestData) {
-    foreach ($this->sensitiveFields as $field) {
-        if (isset($requestData[$field])) {
-            $requestData[$field] = '[FILTERED]';  // Masked
-        }
-    }
-    return $requestData;
+function redactLogData(mixed $data): mixed {
+    // Recursively replaces sensitive field values with [FILTERED].
 }
 ```
 
@@ -931,23 +913,23 @@ private function filterSensitiveData($requestData) {
 - Verification tokens: Masked
 - Session IDs: Masked
 
-**Applied to:** All GET, POST, and SESSION data logged  
+**Applied to:** All nested GET, POST, and SESSION data logged
 **Vulnerabilities Prevented:** Sensitive Data Exposure in Logs, Credential Leakage  
 **Status:** ✅ PROPERLY IMPLEMENTED
 
 ---
 
 #### 12.3 Client IP Detection
-**Location:** `src/Backend/utils/Logger.php` (lines 76-85)  
+**Location:** `src/Backend/utils/Logging.php`
 **Implementation:**
 ```php
-private function getClientIp() {
+function getLogClientIp(): ?string {
     if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
         return $_SERVER['HTTP_CLIENT_IP'];
     } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
         return $_SERVER['HTTP_X_FORWARDED_FOR'];  // Proxy/load balancer
     } else {
-        return $_SERVER['REMOTE_ADDR'];
+        return $_SERVER['REMOTE_ADDR'] ?? null;
     }
 }
 ```
@@ -986,7 +968,9 @@ environment:
 ```json
 {
     "require": {
-        "phpmailer/phpmailer": "^7.0"
+        "phpmailer/phpmailer": "^7.0",
+        "bjeavons/zxcvbn-php": "^1.3",
+        "monolog/monolog": "^3.0"
     }
 }
 ```
@@ -996,6 +980,11 @@ environment:
 - **Purpose:** SMTP email sending
 - **Security:** Trusted, well-maintained project
 - **CVE Check:** Latest version has no known critical vulnerabilities
+
+**Monolog Analysis:**
+- **Version:** 3.x
+- **Purpose:** PSR-3 structured application logging
+- **Configuration:** JSON Lines through a file stream handler and request-context processor
 
 **Additional Frontend Libraries (via CDN):**
 - Zxcvbn.js: Password strength estimation
@@ -1040,7 +1029,7 @@ if($sec_level['score'] < 4) {
 ```php
 // Example from UserController line 354
 $stmt = $this->conn->prepare(
-    "SELECT id, username, password, role, active, first_attempt, last_attempt, timedout, attempts 
+    "SELECT id, username, password, role, active, last_attempt, timedout, attempts
      FROM users 
      WHERE email = ?"
 );
@@ -1482,10 +1471,10 @@ if ($stmt->num_rows == 0) {
 #### VULN-8: X-Forwarded-For Header Spoofing
 **Severity:** 🟡 MEDIUM  
 **CWE:** CWE-295 (Improper Certificate Validation)  
-**Location:** `src/Backend/utils/Logger.php` (lines 80-83)  
+**Location:** `src/Backend/utils/Logging.php`
 **Issue:**
 ```php
-private function getClientIp() {
+function getLogClientIp(): ?string {
     if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
         return $_SERVER['HTTP_CLIENT_IP'];
     } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
@@ -1976,9 +1965,7 @@ public function logout() {
 **Location:** Multiple files  
 **Issue:**
 ```php
-// Logger.php line 18: FIXME: cambia il percorso del file di log e i permessi di scrittura
-// UserController.php line 500: FIXME: come controllo la pagina massima da ritornare?
-// Logger.php line 82: FIXME: meglio un CSV
+// UserController.php line 500: FIXME: Determine the maximum page that can be returned.
 ```
 
 **Problem:**

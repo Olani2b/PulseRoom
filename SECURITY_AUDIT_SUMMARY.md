@@ -6,7 +6,7 @@
 
 #### Authentication & Session Management
 - ✅ Bcrypt password hashing with PASSWORD_DEFAULT
-- ✅ Email verification tokens (200-bit entropy, 1-hour TTL)
+- ✅ Email verification tokens (256-bit entropy, hashed storage, 1-hour TTL)
 - ✅ Session regeneration after login
 - ✅ HttpOnly, Secure, SameSite cookies
 - ✅ Login attempt throttling (3 attempts/1 min)

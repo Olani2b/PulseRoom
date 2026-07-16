@@ -10,7 +10,6 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     role ENUM('free', 'pro', 'admin') DEFAULT 'free',
     active BOOLEAN DEFAULT FALSE,
-    first_attempt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_attempt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     attempts INT DEFAULT 0,
     timedout BOOLEAN DEFAULT FALSE
@@ -28,7 +27,7 @@ CREATE TABLE IF NOT EXISTS files (
 
 CREATE TABLE IF NOT EXISTS tokens (
     email VARCHAR(100) PRIMARY KEY,
-    token VARCHAR(255) DEFAULT NULL,
+    token_hash CHAR(64) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     purpose ENUM('register', 'reset') DEFAULT 'register'
 );

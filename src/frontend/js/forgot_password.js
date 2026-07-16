@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('forgotForm');
   const submitButton = document.getElementById('forgotSubmitBtn');
+  const redirectDelaySeconds = 8;
   if (!form) {
     return;
   }
@@ -53,14 +54,14 @@ document.addEventListener('DOMContentLoaded', () => {
         <span class="forgot-tag">Check Your Inbox</span>
         <h1>Reset email sent</h1>
         <p class="forgot-success-text">If the address exists in our system, you will receive a password reset link shortly.</p>
-        <p class="forgot-countdown">Redirecting to login in <span id="forgotCountdown">3</span> seconds.</p>
+        <p class="forgot-countdown">Redirecting to login in <span id="forgotCountdown">${redirectDelaySeconds}</span> seconds.</p>
         <div class="forgot-actions">
           <a href="/login" class="btn btn-primary">Go to Login</a>
         </div>
       </div>
     `;
 
-    let countdown = 3;
+    let countdown = redirectDelaySeconds;
     const countdownElement = document.getElementById('forgotCountdown');
     const timer = setInterval(() => {
       countdown -= 1;

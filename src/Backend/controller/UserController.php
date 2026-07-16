@@ -3,7 +3,7 @@ require_once __DIR__ . '/../utils/dbManager.php';
 require_once __DIR__ . '/../utils/PostMan.php';
 require_once __DIR__ . '/../service/TokenService.php';
 require_once __DIR__ . '/../service/UserService.php';
-require_once __DIR__ . '/../utils/Logger.php';
+require_once __DIR__ . '/../utils/Logging.php';
 require_once __DIR__.'/../../vendor/autoload.php';
 use ZxcvbnPhp\Zxcvbn;
 
@@ -26,7 +26,7 @@ class UserController
         $this->postman = new PostMan();
         $this->token_service = new TokenService($this->conn);
         $this->user_service = new UserService($this->conn);
-        $this->logger = Logger::getInstance();
+        $this->logger = applicationLogger();
     }
     
     private function checkPasswordFormat($password, $userData = [])
@@ -60,19 +60,19 @@ class UserController
     {
         if(!isset($_SESSION['csrf_token'], $_POST['csrf_token']) || !is_string($_POST['csrf_token']) 
             || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-            $this->logger->error('register', 'Invalid request.', 401);
+            logEvent($this->logger, "error", 'register', 'Invalid request.', 401);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid request.'], 401);
         }
 
         if(!isset($_POST['username']) || !isset($_POST['email']) 
                 || !isset($_POST['password']) || !isset($_POST['conf_password'])) {
-            $this->logger->error('register', 'Invalid request parameters.', 400);
+            logEvent($this->logger, "error", 'register', 'Invalid request parameters.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid request.'], 400);
         }
 
         if(!is_string($_POST['username']) || !is_string($_POST['email']) 
                 || !is_string($_POST['password']) || !is_string($_POST['conf_password'])) {
-            $this->logger->error('register', 'Invalid request parameters.', 400);
+            logEvent($this->logger, "error", 'register', 'Invalid request parameters.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid request.'], 400);
         }
         
@@ -82,13 +82,13 @@ class UserController
         $conf_password = $_POST['conf_password'];
 
         if($password !== $conf_password) {
-            $this->logger->error('register', 'Passwords do not match.', 400);
+            logEvent($this->logger, "error", 'register', 'Passwords do not match.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Passwords do not match.'], 400);
         }
 
         // Check the email format
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->error('register', 'Invalid email format.', 400);
+            logEvent($this->logger, "error", 'register', 'Invalid email format.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid email format.'], 400);
         }
 
@@ -96,13 +96,13 @@ class UserController
 
         $passwordError = $this->checkPasswordFormat($password, [$username, $email]);
         if ($passwordError !== false) {
-            $this->logger->error('register', 'Weak password.', 400);
+            logEvent($this->logger, "error", 'register', 'Weak password.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => $passwordError], 400);
         }
         
         // Check if the user already exists
         if($this->user_service->checkUserExistence($email)) {
-            $this->logger->error('register', 'email re-use for registration.', 409);
+            logEvent($this->logger, "error", 'register', 'email re-use for registration.', 409);
             return $this->sendResponse([
                 'status' => 'error', 
                 'message' => 'Email already in use.'
@@ -110,7 +110,7 @@ class UserController
         }
 
         if($this->user_service->checkUsernameExistence($username)) {
-            $this->logger->error('register', 'username re-use for registration.', 409);
+            logEvent($this->logger, "error", 'register', 'username re-use for registration.', 409);
             return $this->sendResponse([
                 'status' => 'error',
                 'message' => 'Username is already in use. Please choose another one.'
@@ -118,9 +118,9 @@ class UserController
         }
 
         // Generate token
-        $token = $this->token_service->generateToken(100);
+        $token = $this->token_service->generateToken(32);
 
-        // Registra il nuovo utente
+        // Register the new user
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         $stmt = $this->conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
         $stmt->bind_param("sss", $username, $email, $hashedPassword);
@@ -128,7 +128,7 @@ class UserController
         
         // Store the token in the tokens table
         if($this->token_service->storeToken($token, $email) == false) {
-            $this->logger->error('register', 'Failed to store token.', 500);
+            logEvent($this->logger, "error", 'register', 'Failed to store token.', 500);
             return $this->sendResponse(['status' => 'error', 'message' => 'Registration failed.'], 500);
         }
         $htmlTemplate = file_get_contents(__DIR__ . '/../template/confirmationEmail.html');
@@ -142,56 +142,56 @@ class UserController
         try {
             $this->postman->send($email, $subject, $message);
         } catch (Exception $e) {
-            $this->logger->error('register', 'Failed to send email.', 500);
+            logEvent($this->logger, "error", 'register', 'Failed to send email.', 500);
             $stmt = $this->conn->prepare("DELETE FROM users WHERE email = ?");
             $stmt->bind_param("s", $email);
             $stmt->execute();
             $stmt->close();
             while($this->token_service->deleteToken($email, 'register') == false) {
-                $this->logger->error('register', 'Failed to remove register token after failed email send', 500);
+                logEvent($this->logger, "error", 'register', 'Failed to remove register token after failed email send', 500);
             }
             return $this->sendResponse(['status' => 'error', 'message' => 'Registration failed.'], 500);
         }
 
         $stmt->close();
-        $this->logger->info('register', 'User registered successfully.', 201);
+        logEvent($this->logger, "info", 'register', 'User registered successfully.', 201);
         return $this->sendResponse(['status' => 'success', 'message' => 'User registered successfully.'], 201);
     }
 
     public function verifyUser()
     {
-        if(!isset($_GET['token']) || !isset($_GET['email'])
-            || !is_string($_GET['token']) || !is_string($_GET['email'])) {
-            $this->logger->error('verifyUser', 'Missing parameters.', 400);
+        if(!isset($_POST['token']) || !isset($_POST['email'])
+            || !is_string($_POST['token']) || !is_string($_POST['email'])) {
+            logEvent($this->logger, "error", 'verifyUser', 'Missing parameters.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid request.'], 400);
         }
 
-        $receive_token = $_GET['token'];
-        $email = $_GET['email'];
+        $receive_token = $_POST['token'];
+        $email = $_POST['email'];
         
         // Check the email format
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->error('verifyUser', 'Invalid email format.', 400);
+            logEvent($this->logger, "error", 'verifyUser', 'Invalid email format.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid email format.'], 400);
         }
         
         // get the token from the database
         if($this->token_service->checkToken($receive_token, $email, 'register') == false) {
-            $this->logger->error('verifyUser', 'Invalid Token.', 400);
+            logEvent($this->logger, "error", 'verifyUser', 'Invalid Token.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid Token.'], 401);
         }
 
         if(!$this->user_service->setUserStatus($email, ACTIVE)) {
-            $this->logger->error('verifyUser', 'User Staus not updated', 400);
+            logEvent($this->logger, "error", 'verifyUser', 'User Staus not updated', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Failed to verify user.'], 500);
         }
             
         // Delete the token from the tokens table
         if($this->token_service->deleteToken($email, 'register') == false) {
-            $this->logger->error('verifyUser', 'Failed to delete token', 400);
+            logEvent($this->logger, "error", 'verifyUser', 'Failed to delete token', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Failed to verify user.'], 500);
         }
-        $this->logger->info('verifyUser', 'User verified successfully.', 201);
+        logEvent($this->logger, "info", 'verifyUser', 'User verified successfully.', 201);
         return $this->sendResponse(['status' => 'success', 'message' => 'User verified successfully.'], 201);
     }
 
@@ -199,35 +199,35 @@ class UserController
     {
         if(!isset($_POST['csrf_token']) || !is_string($_POST['csrf_token']) 
             || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-            $this->logger->error('forgotPassword', 'Invalid request.', 401);
+            logEvent($this->logger, "error", 'forgotPassword', 'Invalid request.', 401);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid request.'], 401);
         }
 
         if (!isset($_POST['email']) || !is_string($_POST['email'])) {
-            $this->logger->error('forgotPassword', 'Invalid request parameters.', 400);
+            logEvent($this->logger, "error", 'forgotPassword', 'Invalid request parameters.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Email is required.'], 400);
         }
     
         $email = $_POST['email'];
         // Check the email format
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->error('forgotPassword', 'Invalid email format.', 400);
+            logEvent($this->logger, "error", 'forgotPassword', 'Invalid email format.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid email format.'], 400);
         }        
     
         // Check if the user exists
         if($this->user_service->checkUserExistence($email) == false)
         {
-            $this->logger->warning('forgotPassword', 'User not Found', 409);
+            logEvent($this->logger, "warning", 'forgotPassword', 'User not Found', 409);
             return $this->sendResponse(['status' => 'error', 'message' => 'User not found.'], 409);
         }        
     
         // Generate token
-        $token = $this->token_service->generateToken(100);
+        $token = $this->token_service->generateToken(32);
 
         // Store the token in the tokens table
         if ($this->token_service->storeToken($token, $email, 'reset') == false) {
-            $this->logger->error('forgotPassword', 'Failed to initiate password reset.', 500);
+            logEvent($this->logger, "error", 'forgotPassword', 'Failed to initiate password reset.', 500);
             return $this->sendResponse(['status' => 'error', 'message' => 'Failed to initiate password reset.'], 500);
         }
         
@@ -242,13 +242,13 @@ class UserController
         try {
             $this->postman->send($email, $subject, $message);
         } catch (Exception $e) {
-            $stmt = $this->conn->prepare("DELETE FROM tokens WHERE email = ? AND type = 'reset'");
+            $stmt = $this->conn->prepare("DELETE FROM tokens WHERE email = ? AND purpose = 'reset'");
             $stmt->bind_param("s", $email);
             $stmt->execute();
             $stmt->close();
             return $this->sendResponse(['status' => 'error', 'message' => 'Failed to initiate password reset.'], 500);
         }
-        $this->logger->info('forgotPassword', 'Password reset email sent.', 200);
+        logEvent($this->logger, "info", 'forgotPassword', 'Password reset email sent.', 200);
         // Send email with token  
         return $this->sendResponse(['status' => 'success', 'message' => 'An email has been sent to reset your password.'], 200);
     }
@@ -257,19 +257,19 @@ class UserController
     {
         if(!isset($_POST['csrf_token']) || !is_string($_POST['csrf_token']) 
             || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-            $this->logger->error('resetPassword', 'Invalid request.', 401);
+            logEvent($this->logger, "error", 'resetPassword', 'Invalid request.', 401);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid request.'], 401);
         }
 
         if (!isset($_POST['token']) || !isset($_POST['email']) || !isset($_POST['new_password'])
              || !isset($_POST['conf_new_password'])) {
-            $this->logger->error('resetPassword', 'Invalid request parameters.', 400);
+            logEvent($this->logger, "error", 'resetPassword', 'Invalid request parameters.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid request.'], 400);
         }
 
         if(!is_string($_POST['token']) || !is_string($_POST['email']) 
                 || !is_string($_POST['new_password']) || !is_string($_POST['conf_new_password'])) {
-            $this->logger->error('resetPassword', 'Invalid request parameters.', 400);
+            logEvent($this->logger, "error", 'resetPassword', 'Invalid request parameters.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid request.'], 400);
         }
     
@@ -280,19 +280,19 @@ class UserController
 
         // Check the email format
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->error('resetPassword', 'Invalid email format.', 400);
+            logEvent($this->logger, "error", 'resetPassword', 'Invalid email format.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid email format.'], 400);
         }
             
         // Check if the token is valid
         if ($this->token_service->checkToken($receive_token, $email, 'reset') == false) {
-            $this->logger->error('resetPassword', 'Token expired.', 401);
+            logEvent($this->logger, "error", 'resetPassword', 'Token expired.', 401);
             return $this->sendResponse(['status' => 'error', 'message' => 'Token expired, make a new request.'], 401);
         }
 
         // Check if the user exists
         if ($this->user_service->checkUserExistence($email) == false) {
-            $this->logger->error('resetPassword', 'User not found.', 404);
+            logEvent($this->logger, "error", 'resetPassword', 'User not found.', 404);
             return $this->sendResponse(['status' => 'error', 'message' => 'User not found.'], 404);
         }
 
@@ -300,13 +300,13 @@ class UserController
         $username = $this->user_service->getUsername($email);
         $passwordError = $this->checkPasswordFormat($new_password, [$username, $email]);
         if ($passwordError !== false) {
-            $this->logger->error('resetPassword', 'Weak password.', 400);
+            logEvent($this->logger, "error", 'resetPassword', 'Weak password.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => $passwordError], 400);
         }
 
         // Check if the new password and confirm new password match
         if ($new_password !== $conf_new_password) {
-            $this->logger->error('resetPassword', 'Passwords do not match.', 400);
+            logEvent($this->logger, "error", 'resetPassword', 'Passwords do not match.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Passwords do not match.'], 400);
         }
         
@@ -320,22 +320,27 @@ class UserController
         $stmt->close();
  
         if ($executed == false) {
-            $this->logger->error('resetPassword', 'Password reset failed.', 500);
+            logEvent($this->logger, "error", 'resetPassword', 'Password reset failed.', 500);
             return $this->sendResponse(['status' => 'error', 'message' => 'Password reset failed.'], 500);
         }
         
         // Delete the token from the tokens table
         if($this->token_service->deleteToken($email, 'reset') == false) {
-            $this->logger->error('resetPassword', 'Failed to delete token.', 500);
+            logEvent($this->logger, "error", 'resetPassword', 'Failed to delete token.', 500);
             return $this->sendResponse(['status' => 'error', 'message' => 'Failed to verify user.'], 500);
         }
         
         if(!$this->user_service->setUserStatus($email, ACTIVE)){
-            $this->logger->error('resetPassword', 'Failed to enable user.', 500);
+            logEvent($this->logger, "error", 'resetPassword', 'Failed to enable user.', 500);
             return $this->sendResponse(['status' => 'error', 'message' => 'Failed to enable user.'], 500);
         }
 
-        $this->logger->info('resetPassword', 'Password reset successfully.', 200);
+        if(!$this->user_service->resetAttempts($email)){
+            logEvent($this->logger, "error", 'resetPassword', 'Failed to reset login attempts.', 500);
+            return $this->sendResponse(['status' => 'error', 'message' => 'Failed to reset login attempts.'], 500);
+        }
+
+        logEvent($this->logger, "info", 'resetPassword', 'Password reset successfully.', 200);
         return $this->sendResponse(['status' => 'success', 'message' => 'Password reset successfully.'], 200);
     }  
 
@@ -343,7 +348,7 @@ class UserController
     {   
         if(!isset($_POST['csrf_token']) || !is_string($_POST['csrf_token']) 
             || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-            $this->logger->error('login', 'Invalid request.', 401);
+            logEvent($this->logger, "error", 'login', 'Invalid request.', 401);
             return $this->sendResponse([
                 'status' => 'error',
                 'message' => 'Invalid request.'
@@ -352,37 +357,37 @@ class UserController
 
         if (!isset($_POST['username']) || !isset($_POST['password']) 
                 || !is_string($_POST['username']) || !is_string($_POST['password'])) {
-            $this->logger->error('login', 'Invalid request parameters.', 400);
+            logEvent($this->logger, "error", 'login', 'Invalid request parameters.', 400);
             return $this->sendResponse([
                 'status' => 'error', 
                 'message' => 'Invalid request.'
             ], 400);
         }
 
-        $username = trim($_POST['username']);
+        $login = trim($_POST['username']);
         $password = $_POST['password'];
 
-        if ($username === '') {
-            $this->logger->error('login', 'Invalid username.', 400);
+        if ($login === '') {
+            logEvent($this->logger, "error", 'login', 'Invalid username or email.', 400);
             return $this->sendResponse([
                 'status' => 'error', 
-                'message' => 'Invalid username.'
+                'message' => 'Invalid username or email.'
             ], 400);
         }
 
-        // Controlla se l'utente esiste
+        // Check whether the user exists
         $stmt = $this->conn->prepare( 
-            "SELECT id, username, email, password, role, active, first_attempt, last_attempt, timedout, attempts 
+            "SELECT id, username, email, password, role, active, last_attempt, timedout, attempts
                     FROM users 
-                    WHERE username = ?"
+                    WHERE username = ? OR email = ?"
                 );
-        $stmt->bind_param("s", $username);
+        $stmt->bind_param("ss", $login, $login);
         $stmt->execute();
         $stmt->store_result();
 
         if ($stmt->num_rows == 0) {
             $stmt->close();
-            $this->logger->error(
+            logEvent($this->logger, 'error',
                 'login', 
                 'Invalid username or password.', 
                 401
@@ -393,10 +398,14 @@ class UserController
             ], 401);
         }
 
-        $stmt->bind_result($id, $username, $email, $hashedPassword, $role, $status, 
-                    $first_attempt, $last_attempt, $timedout, $attempts);
+        $stmt->bind_result($id, $username, $email, $hashedPassword, $role, $status,
+                    $last_attempt, $timedout, $attempts);
         $stmt->fetch();
         $stmt->close();
+
+        $status = (int) $status;
+        $timedout = (int) $timedout;
+        $attempts = (int) $attempts;
 
         //Check if the user is timedout
         if($timedout)
@@ -411,7 +420,7 @@ class UserController
                 $timedout = false;
             }
             else {
-                $this->logger->error('login', 'User is timed out.', 401);
+                logEvent($this->logger, "error", 'login', 'User is timed out.', 401);
                 return $this->sendResponse([
                     'status' => 'error', 
                     'message' => 'Invalid credentials or too many failed attempts.'
@@ -422,11 +431,11 @@ class UserController
         if(!password_verify($password, $hashedPassword)) {
             if($status === ACTIVE){
                 $this->user_service->updateLoginAttempts(
-                    $email, $first_attempt, 
+                    $email, $last_attempt,
                     $timedout, $attempts
                 );
             }
-            $this->logger->error(
+            logEvent($this->logger, 'error',
                 'login', 
                 'Invalid username or password.', 
                 401
@@ -438,7 +447,7 @@ class UserController
         }
 
         if ($status === INACTIVE) {
-            $this->logger->error(
+            logEvent($this->logger, 'error',
                 'login', 
                 'User is inactive.', 
                 401
@@ -458,7 +467,7 @@ class UserController
         $_SESSION['user_id'] = $id;
         $_SESSION['email'] = $email;
 
-        $this->logger->info(
+        logEvent($this->logger, 'info',
             'login', 
             'Login successful.', 
             200
@@ -473,10 +482,10 @@ class UserController
     {
         if(!isset($_POST['csrf_token']) || !is_string($_POST['csrf_token']) 
             || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-            $this->logger->error('logout', 'Invalid request parameters.', 403);
+            logEvent($this->logger, "error", 'logout', 'Invalid request parameters.', 403);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid request.'], 403);
         }
-        $this->logger->info(
+        logEvent($this->logger, 'info',
             'logout',
             'Logout successful.', 200
         );
@@ -495,7 +504,7 @@ class UserController
         $limit = isset($_GET['limit']) && is_numeric($_GET['limit']) ? $_GET['limit'] : 10;
 
         if($page < 1){
-            $page = 1; //FIXME: come controllo la pagina massima da ritornare?
+            $page = 1; // FIXME: Determine the maximum page that can be returned.
         }
         if($limit < 1 || $limit > 10){
             $limit = 10;
@@ -532,7 +541,7 @@ class UserController
         }
 
         $stmt->close();
-        $this->logger->info('showUsers', 'Users retrieved successfully.', 200);
+        logEvent($this->logger, "info", 'showUsers', 'Users retrieved successfully.', 200);
         return $this->sendResponse(['status' => 'success', 'data' => $users, 'last-page' => $isLastPage], 200);
 
     }
@@ -541,18 +550,18 @@ class UserController
     {
         if(!isset($_POST['csrf_token']) || !is_string($_POST['csrf_token']) 
             || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-            $this->logger->error('changeUserRole', 'Invalid request.', 401);
+            logEvent($this->logger, "error", 'changeUserRole', 'Invalid request.', 401);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid request.'], 401);
         }
 
         if(!isset($_POST['id']) || !isset($_POST['new_role']) || !isset($_POST['actual_role'])) {
-            $this->logger->error('changeUserRole', 'Invalid request parameters.', 400);
+            logEvent($this->logger, "error", 'changeUserRole', 'Invalid request parameters.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid request.'], 400);
         }
 
         if(!is_numeric($_POST['id']) || !is_string($_POST['new_role']) 
                 || !is_string($_POST['actual_role'])) {
-            $this->logger->error('changeUserRole', 'Invalid request parameters.', 400);
+            logEvent($this->logger, "error", 'changeUserRole', 'Invalid request parameters.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid request.'], 400);
         }
 
@@ -563,7 +572,7 @@ class UserController
 
         if(!in_array($newRole, ['free', 'admin', 'pro'], true)
             || !in_array($actualRole, ['free', 'admin', 'pro'], true)) {
-            $this->logger->error(
+            logEvent($this->logger, 'error',
                 'changeUserRole',
                  'Invalid role.',
                   400
@@ -575,12 +584,12 @@ class UserController
         }
 
         if ($actualRole === 'admin' || $newRole === 'admin') {
-            $this->logger->error('changeUserRole', 'Unauthorized.', 401);
+            logEvent($this->logger, "error", 'changeUserRole', 'Unauthorized.', 401);
             return $this->sendResponse(['status' => 'error', 'message' => 'Unauthorized.'], 401);
         }
 
         if ( $actualRole ===  $newRole ){
-            $this->logger->error('changeUserRole', 'Invalid request.', 400);
+            logEvent($this->logger, "error", 'changeUserRole', 'Invalid request.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid request.'], 400);
         }
 
@@ -596,7 +605,7 @@ class UserController
         //$stmt->close();
         
         if($stmt->num_rows == 0) {
-            $this->logger->error('changeUserRole', 'User not found.', 404);
+            logEvent($this->logger, "error", 'changeUserRole', 'User not found.', 404);
             return $this->sendResponse(['status' => 'error', 'message' => 'User not found.'], 404);
         }
         $stmt->bind_result($role);
@@ -604,12 +613,12 @@ class UserController
         $stmt->close();
 
         if($role === 'admin') {
-            $this->logger->error('changeUserRole', 'Unauthorized.', 401);
+            logEvent($this->logger, "error", 'changeUserRole', 'Unauthorized.', 401);
             return $this->sendResponse(['status' => 'error', 'message' => 'Unauthorized.'], 401);
         }
 
         if($role === $newRole || $role !== $actualRole) {
-            $this->logger->error('changeUserRole', 'Invalid request.', 400);
+            logEvent($this->logger, "error", 'changeUserRole', 'Invalid request.', 400);
             return $this->sendResponse(['status' => 'error', 'message' => 'Invalid request.'], 400);
         }
         
@@ -618,12 +627,12 @@ class UserController
 
         if ($stmt->execute()) {
             $stmt->close();
-            $this->logger->info('changeUserRole', 'Role changed successfully.', 200);
+            logEvent($this->logger, "info", 'changeUserRole', 'Role changed successfully.', 200);
             return $this->sendResponse(['status' => 'success', 'message' => 'Role changed successfully.'], 200);
         }
 
         $stmt->close();
-        $this->logger->error('changeUserRole', 'Role change failed.', 500);
+        logEvent($this->logger, "error", 'changeUserRole', 'Role change failed.', 500);
         return $this->sendResponse(['status' => 'error', 'message' => 'Role change failed.'], 500);   
     }
 

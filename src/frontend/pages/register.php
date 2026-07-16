@@ -29,7 +29,7 @@ $currentPage = 'register';
           <p>Create your account to access the protected platform features.</p>
         </div>
 
-        <div id="registerMessage" class="register-message" style="display: none;"></div>
+        <div id="registerMessage" class="register-message"></div>
 
         <form id="registerForm" class="register-form" method="POST" novalidate>
           <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">

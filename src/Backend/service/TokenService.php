@@ -16,9 +16,10 @@ class TokenService
 
     public function storeToken($token, $email, $purpose = 'register')
     {
-        $stmt = $this->conn->prepare("INSERT INTO tokens (email, token, purpose) VALUES (?, ?, ?)
-        ON DUPLICATE KEY UPDATE token = VALUES(token)");
-        $stmt->bind_param("sss", $email, $token, $purpose);
+        $tokenHash = hash('sha256', $token);
+        $stmt = $this->conn->prepare("INSERT INTO tokens (email, token_hash, purpose) VALUES (?, ?, ?)
+        ON DUPLICATE KEY UPDATE token_hash = VALUES(token_hash), purpose = VALUES(purpose), created_at = CURRENT_TIMESTAMP");
+        $stmt->bind_param("sss", $email, $tokenHash, $purpose);
         $executed = $stmt->execute();
         $stmt->close();
         
@@ -36,9 +37,9 @@ class TokenService
 
     public function checkToken($token, $email, $purpose)
     {
-        $true_created_at = date('Y-m-d H:i:s', strtotime('-1 hour'));
-        $stmt = $this->conn->prepare("SELECT * FROM tokens WHERE token = ? AND email = ? AND purpose = ? AND created_at > ?");
-        $stmt->bind_param("ssss", $token, $email, $purpose, $true_created_at);
+        $tokenHash = hash('sha256', $token);
+        $stmt = $this->conn->prepare("SELECT 1 FROM tokens WHERE token_hash = ? AND email = ? AND purpose = ? AND created_at > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)");
+        $stmt->bind_param("sss", $tokenHash, $email, $purpose);
         $stmt->execute();
         $stmt->store_result();
         $rows_check = $stmt->num_rows > 0;

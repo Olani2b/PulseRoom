@@ -29,9 +29,6 @@ services:
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
-
-    ports:
-      - "3306:3306"
     volumes:
       - "./dump:/var/lib/mysql"
       - "./init.sql:/docker-entrypoint-initdb.d/init.sql"
@@ -41,7 +38,7 @@ services:
     container_name: phpmyadmin_container
     restart: always
     ports:
-      - "8080:80"
+      - "127.0.0.1:8080:80"
     environment:
       PMA_HOST: mysql
       PMA_PORT: 3306

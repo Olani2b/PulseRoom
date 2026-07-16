@@ -73,12 +73,12 @@ class UserService
     public function differenceInMinutes($first_dt , $second_dt)
     {
         $interval = $first_dt->diff($second_dt);
-        $minutes = ($interval->y * 365 * 24 * 60) +  // Converti anni in minuti
-           ($interval->m * 30 * 24 * 60) +   // Converti mesi in minuti (approssimazione: 30 giorni per mese)
-           ($interval->d * 24 * 60) +        // Converti giorni in minuti
-           ($interval->h * 60) +            // Converti ore in minuti
+        $minutes = ($interval->y * 365 * 24 * 60) +  // Convert years to minutes
+           ($interval->m * 30 * 24 * 60) +   // Convert months to minutes (approximately 30 days each)
+           ($interval->d * 24 * 60) +        // Convert days to minutes
+           ($interval->h * 60) +             // Convert hours to minutes
            $interval->i;
-           #$interval->s; // Converti secondi in minuti
+           #$interval->s; // Convert seconds to minutes
         return $minutes;      
         //$interval_seconds = $interval->i * 60 + $interval->s; // Convert the difference to seconds
         //return $interval_seconds / 60; // Convert the difference to minutes
@@ -88,7 +88,7 @@ class UserService
     {
         $stmt = $this->conn->prepare(
             "UPDATE users
-             SET attempts = 0, timedout = 0, first_attempt = NOW() ,last_attempt = NOW() 
+             SET attempts = 0, timedout = 0, last_attempt = NOW()
              WHERE email = ?"
         );
         $stmt->bind_param("s", $email);
@@ -97,15 +97,15 @@ class UserService
         return $executed;
     }
 
-    public function updateLoginAttempts($email, $first_attempt, $timedout, $attempts)
+    public function updateLoginAttempts($email, $last_attempt, $timedout, $attempts)
     {
         if($timedout)
             return;
         // Update the login attempts
-        //Se sono passati più di 5 minuti dall'ultimo tentativo, resetta il contatore degli errori
+        // Reset the failure counter when the timeout window has elapsed since the last attempt
         $now = new DateTime();
         $minutes = $this->differenceInMinutes(
-            new DateTime($first_attempt),
+            new DateTime($last_attempt),
             $now
         );
         

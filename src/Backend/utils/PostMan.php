@@ -13,7 +13,7 @@ use PHPMailer\PHPMailer\Exception;
 //Load Composer's autoloader
 require __DIR__.'/../../vendor/autoload.php';
 class PostMan {
-    // Proprietà della classe
+    // Class properties
     private $postman;
 
     public function __construct() {

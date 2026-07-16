@@ -26,7 +26,7 @@ $currentPage = 'login';
         <div class="login-header">
           <span class="login-tag">Account Access</span>
           <h1>Login</h1>
-          <p>Enter your username and password to continue to the platform.</p>
+          <p>Enter your username or email and password to continue to the platform.</p>
         </div>
 
         <?php if (isset($_GET['verified']) && $_GET['verified'] == 1): ?>
@@ -39,8 +39,8 @@ $currentPage = 'login';
           <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
 
           <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            <label for="username">Username or Email</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username or email" required>
           </div>
 
           <div class="form-group">
