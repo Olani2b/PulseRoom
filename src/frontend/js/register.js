@@ -5,68 +5,97 @@ document.addEventListener('DOMContentLoaded', () => {
   const passwordMessage = document.getElementById('passwordMessage');
   const strengthFill = document.getElementById('strengthFill');
   const strengthText = document.getElementById('strengthText');
-  const registerMessage = document.getElementById('registerMessage');
   const submitButton = document.getElementById('registerSubmitBtn');
 
   const togglePassword = document.getElementById('togglePassword');
-  const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+  const toggleConfirmPassword = document.getElementById(
+    'toggleConfirmPassword'
+  );
+
+  if (
+    !form ||
+    !passwordInput ||
+    !confirmInput ||
+    !passwordMessage ||
+    !strengthFill ||
+    !strengthText
+  ) {
+    return;
+  }
 
   const setToggle = (button, input) => {
-    if (!button || !input) {
+    if (!button) {
       return;
     }
-    button.addEventListener('click', () => {
+
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+
       const isHidden = input.type === 'password';
+
       input.type = isHidden ? 'text' : 'password';
       button.textContent = isHidden ? 'Hide' : 'Show';
     });
   };
 
-  const updateStrength = () => {
-    const value = passwordInput.value;
-    const hasLower = /[a-z]/.test(value);
-    const hasUpper = /[A-Z]/.test(value);
-    const hasNumber = /[0-9]/.test(value);
-    const hasSpecial = /[^A-Za-z0-9]/.test(value);
-    const categories = [hasLower, hasUpper, hasNumber, hasSpecial].filter(Boolean).length;
-    const meetsMinimum = value.length >= 8 && hasLower && hasUpper && hasNumber;
-
-    let score = 0;
-
-    if (value.length === 0) {
-      score = 0;
-    } else if (!meetsMinimum) {
-      score = value.length >= 8 || categories >= 2 ? 1 : 0;
-    } else if (value.length >= 14 && categories >= 4) {
-      score = 3;
-    } else if (value.length >= 10 && categories >= 3) {
-      score = 2;
-    } else {
-      score = 2;
+  const getPasswordError = (password) => {
+    if (password.length < 8) {
+      return 'Password must be at least 8 characters long.';
     }
 
-    const widths = ['0%', '25%', '50%', '75%', '75%'];
-    const labels = [
-      'Use 8+ characters with uppercase, lowercase, and a number. Avoid common words.',
-      'Weak password',
-      'Okay password',
-      'Good password',
-      'Good password'
-    ];
-    const fillColors = ['#253244', '#d8868b', '#c9a46a', '#8fc0c9', '#8fc0c9'];
-    const textClasses = ['', 'too-weak', 'weak', 'good', 'good'];
-
-    strengthFill.style.width = widths[score];
-    strengthFill.style.background = fillColors[score];
-    strengthText.textContent = labels[score];
-    strengthText.classList.remove('too-weak', 'weak', 'good', 'strong');
-    if (textClasses[score]) {
-      strengthText.classList.add(textClasses[score]);
+    if (!/[A-Z]/.test(password)) {
+      return 'Password must contain at least one uppercase letter.';
     }
+
+    if (!/[a-z]/.test(password)) {
+      return 'Password must contain at least one lowercase letter.';
+    }
+
+    if (!/[0-9]/.test(password)) {
+      return 'Password must contain at least one number.';
+    }
+
+    if (!/[^A-Za-z0-9\s]/.test(password)) {
+      return 'Password must contain at least one special character.';
+    }
+
+    return null;
   };
 
+  const updatePasswordState = () => {
+  const password = passwordInput.value;
+
+  strengthText.classList.remove('too-weak', 'weak', 'good', 'strong');
+
+  if (!password) {
+    strengthFill.style.width = '0%';
+    strengthFill.style.backgroundColor = '#253244';
+
+    strengthText.textContent =
+        'Use 8+ characters with uppercase, lowercase, a number, and a special character.';
+    return;
+  }
+
+  const passwordError = getPasswordError(password);
+
+  if (passwordError) {
+    strengthFill.style.width = '35%';
+    strengthFill.style.backgroundColor = '#d8868b';
+
+    strengthText.textContent = passwordError;
+    strengthText.classList.add('too-weak');
+    return;
+  }
+
+  strengthFill.style.width = '100%';
+  strengthFill.style.backgroundColor = '#8fc0c9';
+
+  strengthText.textContent = 'Basic password requirements satisfied.';
+  strengthText.classList.add('good');
+};
+
   const updateMatchState = () => {
-    if (!passwordInput.value && !confirmInput.value) {
+    if (!confirmInput.value) {
       passwordMessage.textContent = '';
       return;
     }
@@ -80,57 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  setToggle(togglePassword, passwordInput);
-  setToggle(toggleConfirmPassword, confirmInput);
-
-  passwordInput?.addEventListener('input', () => {
-    updateStrength();
-    updateMatchState();
-  });
-  confirmInput?.addEventListener('input', updateMatchState);
-
-  if (!form) {
-    return;
-  }
-
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const originalLabel = submitButton?.textContent || 'Register';
-
-    try {
-      if (submitButton) {
-        submitButton.disabled = true;
-        submitButton.textContent = 'Creating account...';
-      }
-
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        body: new FormData(form)
-      });
-      const result = await response.json();
-
-      if (!response.ok) {
-        showToast('error', result.message || 'Registration failed.');
-        if (submitButton) {
-          submitButton.disabled = false;
-          submitButton.textContent = originalLabel;
-        }
-        return;
-      }
-
-      showToast('success', result.message || 'User registered successfully.');
-      renderSuccessState();
-    } catch (error) {
-      showToast('error', 'Unable to register right now.');
-      if (submitButton) {
-        submitButton.disabled = false;
-        submitButton.textContent = originalLabel;
-      }
-    }
-  });
-
   const renderSuccessState = () => {
     const card = document.querySelector('.register-card');
+
     if (!card) {
       window.location.href = '/login';
       return;
@@ -140,8 +121,17 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="register-success">
         <span class="register-tag">Check Your Inbox</span>
         <h1>Registration successful</h1>
-        <p class="register-success-text">We sent you a verification email. Please confirm your account before logging in.</p>
-        <p class="register-countdown">Redirecting to login in <span id="registerCountdown">3</span> seconds.</p>
+
+        <p class="register-success-text">
+          We sent you a verification email. Please confirm your account
+          before logging in.
+        </p>
+
+        <p class="register-countdown">
+          Redirecting to login in
+          <span id="registerCountdown">3</span> seconds.
+        </p>
+
         <div class="register-actions">
           <a href="/login" class="btn btn-primary">Go to Login</a>
         </div>
@@ -149,16 +139,97 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     let countdown = 3;
-    const countdownElement = document.getElementById('registerCountdown');
+    const countdownElement = document.getElementById(
+      'registerCountdown'
+    );
+
     const timer = setInterval(() => {
       countdown -= 1;
+
       if (countdownElement) {
         countdownElement.textContent = String(countdown);
       }
+
       if (countdown <= 0) {
         clearInterval(timer);
         window.location.href = '/login';
       }
     }, 1000);
   };
+
+  setToggle(togglePassword, passwordInput);
+  setToggle(toggleConfirmPassword, confirmInput);
+
+  passwordInput.addEventListener('input', () => {
+    updatePasswordState();
+    updateMatchState();
+  });
+
+  confirmInput.addEventListener('input', updateMatchState);
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const passwordError = getPasswordError(passwordInput.value);
+
+    if (passwordError) {
+      showToast('error', passwordError);
+      passwordInput.focus();
+      return;
+    }
+
+    if (passwordInput.value !== confirmInput.value) {
+      showToast('error', 'Passwords do not match.');
+      confirmInput.focus();
+      return;
+    }
+
+    const originalLabel = submitButton?.textContent || 'Register';
+
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = 'Creating account...';
+    }
+
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        body: new FormData(form)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        showToast(
+          'error',
+          result.message || 'Registration failed.'
+        );
+
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = originalLabel;
+        }
+
+        return;
+      }
+
+      showToast(
+        'success',
+        result.message || 'User registered successfully.'
+      );
+
+      renderSuccessState();
+    } catch (error) {
+      console.error(error);
+
+      showToast('error', 'Unable to register right now.');
+
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalLabel;
+      }
+    }
+  });
+
+  updatePasswordState();
 });

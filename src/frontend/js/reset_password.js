@@ -90,13 +90,17 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  const email = form.querySelector('input[name="email"]').value;
-  const token = form.querySelector('input[name="token"]').value;
+  const email = getQueryParam('email');
+  const token = getQueryParam('token');
   if (!email || !token) {
     showToast('error', 'Invalid reset link.');
     form.querySelector('button[type="submit"]').disabled = true;
     return;
   }
+
+  form.querySelector('input[name="email"]').value = email;
+  form.querySelector('input[name="token"]').value = token;
+  window.history.replaceState({}, document.title, '/reset_password');
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();

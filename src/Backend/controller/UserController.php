@@ -41,6 +41,8 @@ class UserController
             return 'Password must contain at least one lowercase letter.';
         } elseif (!preg_match('/[0-9]/', $password)) {
             return 'Password must contain at least one number.';
+        } elseif (!preg_match('/[^A-Za-z0-9\s]/', $password)) {
+            return 'Password must contain at least one special character.';
         }
         $zxcvbn = new Zxcvbn();
         $sec_level = $zxcvbn->passwordStrength($password, $userData);

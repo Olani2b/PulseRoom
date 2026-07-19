@@ -2,8 +2,6 @@
 $assetBase = '/frontend';
 $currentUserRole = 'guest';
 $currentPage = 'login';
-$email = isset($_GET['email']) ? htmlspecialchars($_GET['email'], ENT_QUOTES, 'UTF-8') : '';
-$token = isset($_GET['token']) ? htmlspecialchars($_GET['token'], ENT_QUOTES, 'UTF-8') : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,8 +31,8 @@ $token = isset($_GET['token']) ? htmlspecialchars($_GET['token'], ENT_QUOTES, 'U
 
         <form id="resetForm" class="reset-form" method="POST" novalidate>
           <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-          <input type="hidden" name="email" value="<?= $email; ?>">
-          <input type="hidden" name="token" value="<?= $token; ?>">
+          <input type="hidden" name="email" value="">
+          <input type="hidden" name="token" value="">
 
           <div class="form-group">
             <label for="new_password">New Password</label>

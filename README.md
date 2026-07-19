@@ -11,7 +11,7 @@ Pulse Room is the project for the "System and network Hacking"'s course of Unive
   - Users log in with their username and password.
   - Forgot your password? Users can recover their account.
 
-- **Novel Uploading and Reading:**
+- **Lyrics Uploading and Reading:**
   - Users can upload novels in two formats: short stories or full-length novels (PDFs).
   - Short stories are displayed directly in the user's browser.
   - Full-length novels are uploaded as PDFs and can be downloaded by users.
@@ -32,7 +32,7 @@ Here are the installation steps:
 
 1. Clone the repository:
     ```
-    git clone https://github.com/Dimerin/PulseRoom
+    git clone https://github.com/Olani2b/PulseRoom
     cd PulseRoom
     ```
 2. Create or prepare a valid email for the application use.
