@@ -5,65 +5,91 @@ document.addEventListener('DOMContentLoaded', () => {
   const passwordMessage = document.getElementById('resetPasswordMessage');
   const strengthFill = document.getElementById('resetStrengthFill');
   const strengthText = document.getElementById('resetStrengthText');
+  const submitButton = form?.querySelector('button[type="submit"]');
 
   const toggleNew = document.getElementById('toggleNewPassword');
   const toggleConfirm = document.getElementById('toggleConfirmNewPassword');
 
+  if (
+    !form ||
+    !passwordInput ||
+    !confirmInput ||
+    !passwordMessage ||
+    !strengthFill ||
+    !strengthText
+  ) {
+    return;
+  }
+
   const setToggle = (button, input) => {
-    if (!button || !input) {
+    if (!button) {
       return;
     }
-    button.addEventListener('click', () => {
+
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+
       const isHidden = input.type === 'password';
       input.type = isHidden ? 'text' : 'password';
       button.textContent = isHidden ? 'Hide' : 'Show';
     });
   };
 
-  const updateStrength = () => {
-    const value = passwordInput.value;
-    const hasLower = /[a-z]/.test(value);
-    const hasUpper = /[A-Z]/.test(value);
-    const hasNumber = /[0-9]/.test(value);
-    const hasSpecial = /[^A-Za-z0-9]/.test(value);
-    const categories = [hasLower, hasUpper, hasNumber, hasSpecial].filter(Boolean).length;
-    const meetsMinimum = value.length >= 8 && hasLower && hasUpper && hasNumber;
-
-    let score = 0;
-    if (value.length === 0) {
-      score = 0;
-    } else if (!meetsMinimum) {
-      score = value.length >= 8 || categories >= 2 ? 1 : 0;
-    } else if (value.length >= 14 && categories >= 4) {
-      score = 3;
-    } else if (value.length >= 10 && categories >= 3) {
-      score = 2;
-    } else {
-      score = 2;
+  const getPasswordError = (password) => {
+    if (password.length < 8) {
+      return 'Password must be at least 8 characters long.';
     }
 
-    const widths = ['0%', '25%', '50%', '75%', '75%'];
-    const labels = [
-      'Use 8+ characters with uppercase, lowercase, and a number. Avoid common words.',
-      'Weak password',
-      'Okay password',
-      'Good password',
-      'Good password'
-    ];
-    const fillColors = ['#253244', '#d8868b', '#c9a46a', '#8fc0c9', '#8fc0c9'];
-    const textClasses = ['', 'too-weak', 'weak', 'good', 'good'];
+    if (!/[A-Z]/.test(password)) {
+      return 'Password must contain at least one uppercase letter.';
+    }
 
-    strengthFill.style.width = widths[score];
-    strengthFill.style.background = fillColors[score];
-    strengthText.textContent = labels[score];
+    if (!/[a-z]/.test(password)) {
+      return 'Password must contain at least one lowercase letter.';
+    }
+
+    if (!/[0-9]/.test(password)) {
+      return 'Password must contain at least one number.';
+    }
+
+    if (!/[^A-Za-z0-9\s]/.test(password)) {
+      return 'Password must contain at least one special character.';
+    }
+
+    return null;
+  };
+
+  const updatePasswordState = () => {
+    const password = passwordInput.value;
+
     strengthText.classList.remove('too-weak', 'weak', 'good', 'strong');
-    if (textClasses[score]) {
-      strengthText.classList.add(textClasses[score]);
+
+    if (!password) {
+      strengthFill.style.width = '0%';
+      strengthFill.style.backgroundColor = '#253244';
+      strengthText.textContent =
+        'Use 8+ characters with uppercase, lowercase, a number, and a special character.';
+      return;
     }
+
+    const passwordError = getPasswordError(password);
+
+    if (passwordError) {
+      strengthFill.style.width = '35%';
+      strengthFill.style.backgroundColor = '#d8868b';
+      strengthText.textContent = passwordError;
+      strengthText.classList.add('too-weak');
+      return;
+    }
+
+    strengthFill.style.width = '100%';
+    strengthFill.style.backgroundColor = '#8fc0c9';
+    strengthText.textContent = 'Basic password requirements satisfied.';
+    strengthText.classList.add('good');
   };
 
   const updateMatchState = () => {
-    if (!passwordInput.value && !confirmInput.value) {
+    if (!confirmInput.value) {
       passwordMessage.textContent = '';
       return;
     }
@@ -80,21 +106,19 @@ document.addEventListener('DOMContentLoaded', () => {
   setToggle(toggleNew, passwordInput);
   setToggle(toggleConfirm, confirmInput);
 
-  passwordInput?.addEventListener('input', () => {
-    updateStrength();
+  passwordInput.addEventListener('input', () => {
+    updatePasswordState();
     updateMatchState();
   });
-  confirmInput?.addEventListener('input', updateMatchState);
-
-  if (!form) {
-    return;
-  }
+  confirmInput.addEventListener('input', updateMatchState);
 
   const email = getQueryParam('email');
   const token = getQueryParam('token');
   if (!email || !token) {
     showToast('error', 'Invalid reset link.');
-    form.querySelector('button[type="submit"]').disabled = true;
+    if (submitButton) {
+      submitButton.disabled = true;
+    }
     return;
   }
 
@@ -104,6 +128,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+
+    const passwordError = getPasswordError(passwordInput.value);
+
+    if (passwordError) {
+      showToast('error', passwordError);
+      passwordInput.focus();
+      return;
+    }
+
+    if (passwordInput.value !== confirmInput.value) {
+      showToast('error', 'Passwords do not match.');
+      confirmInput.focus();
+      return;
+    }
 
     try {
       const response = await fetch('/api/reset_pwd', {
@@ -125,4 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast('error', 'Unable to reset the password right now.');
     }
   });
+
+  updatePasswordState();
 });

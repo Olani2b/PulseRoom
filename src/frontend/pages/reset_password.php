@@ -44,7 +44,7 @@ $currentPage = 'login';
               <div class="strength-bar">
                 <div id="resetStrengthFill" class="strength-fill"></div>
               </div>
-              <p id="resetStrengthText" class="strength-text">Use 8+ characters with uppercase, lowercase, and a number. Avoid common words.</p>
+              <p id="resetStrengthText" class="strength-text">Use 8+ characters with uppercase, lowercase, a number, and a special character.</p>
             </div>
           </div>
 
